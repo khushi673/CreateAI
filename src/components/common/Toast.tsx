@@ -37,7 +37,7 @@ export const ToastContainer: React.FC = () => {
             </div>
 
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold tracking-wide uppercase">{toast.title}</h4>
+              <h4 className="text-xs font-bold">{toast.title}</h4>
               {toast.message && <p className="text-xs text-zinc-300 mt-1 leading-snug">{toast.message}</p>}
             </div>
 

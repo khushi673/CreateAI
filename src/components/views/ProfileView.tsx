@@ -2,15 +2,15 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Settings, User, Key, Bell, Shield, Save, Copy, Check } from 'lucide-react';
+import { Settings, User, Bell, Save } from 'lucide-react';
+import { DeveloperApiPanel } from '@/components/profile/DeveloperApiPanel';
 
 export const ProfileView: React.FC = () => {
   const { user, setUser, addToast } = useApp();
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState(user.role);
-  const [apiKey, setApiKey] = useState('ag_live_99418294102948102948019');
-  const [copiedKey, setCopiedKey] = useState(false);
+  const [tab, setTab] = useState<'profile' | 'api-keys'>('profile');
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,14 +20,7 @@ export const ProfileView: React.FC = () => {
       email,
       role,
     }));
-    addToast('Profile Updated', 'Saved user profile changes to local account', 'success');
-  };
-
-  const handleCopyKey = () => {
-    navigator.clipboard.writeText(apiKey);
-    setCopiedKey(true);
-    addToast('API Key Copied', 'Copied secret key to clipboard', 'info');
-    setTimeout(() => setCopiedKey(false), 2000);
+    addToast('Profile saved', 'Your profile changes were saved', 'success');
   };
 
   return (
@@ -37,20 +30,34 @@ export const ProfileView: React.FC = () => {
       <div className="border-b border-zinc-800 pb-4">
         <div className="flex items-center gap-2">
           <Settings className="w-6 h-6 text-purple-400" />
-          <h1 className="text-xl sm:text-2xl font-black text-white">Profile & Preferences</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-white">Settings</h1>
         </div>
-        <p className="text-xs text-zinc-400 mt-1">
-          Manage creator profile information, API developer keys, and notification settings.
-        </p>
       </div>
 
-      {/* Main Form */}
+      <div className="inline-flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs font-semibold">
+        {([['profile', 'Profile'], ['api-keys', 'API keys']] as const).map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={`px-4 py-2 rounded-xl transition-all ${tab === id ? 'bg-purple-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'api-keys' ? (
+        <div className="space-y-4">
+          <p className="text-xs text-zinc-400">Use an API key to connect tools such as ComfyUI. Demo keys only.</p>
+          <DeveloperApiPanel />
+        </div>
+      ) : (
       <form onSubmit={handleSave} className="space-y-6">
         
-        {/* User Account Details Card */}
+        {/* Profile */}
         <div className="p-6 rounded-3xl glass-panel border border-zinc-800 space-y-4">
           <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <User className="w-4 h-4 text-purple-400" /> Creator Profile Info
+            <User className="w-4 h-4 text-purple-400" /> Profile
           </h2>
 
           <div className="flex items-center gap-4 py-2">
@@ -60,18 +67,18 @@ export const ProfileView: React.FC = () => {
             <div>
               <button
                 type="button"
-                onClick={() => addToast('Avatar Updated', 'Loaded new avatar image', 'info')}
+                onClick={() => addToast('Avatar updated', 'New avatar image loaded', 'info')}
                 className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-semibold text-white"
               >
-                Change Avatar Photo
+                Change avatar
               </button>
-              <p className="text-[10px] text-zinc-400 mt-1">JPG, PNG up to 5MB.</p>
+              <p className="text-[10px] text-zinc-400 mt-1">JPG or PNG, up to 5 MB.</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-1">Display Name</label>
+              <label className="block text-xs font-bold text-zinc-300 mb-1">Display name</label>
               <input
                 type="text"
                 value={name}
@@ -80,7 +87,7 @@ export const ProfileView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-1">Email Address</label>
+              <label className="block text-xs font-bold text-zinc-300 mb-1">Email address</label>
               <input
                 type="email"
                 value={email}
@@ -91,7 +98,7 @@ export const ProfileView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-zinc-300 mb-1">Role / Specialization</label>
+            <label className="block text-xs font-bold text-zinc-300 mb-1">Role</label>
             <input
               type="text"
               value={role}
@@ -101,51 +108,24 @@ export const ProfileView: React.FC = () => {
           </div>
         </div>
 
-        {/* Developer API Keys Card */}
+        {/* Notifications */}
         <div className="p-6 rounded-3xl glass-panel border border-zinc-800 space-y-4">
           <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <Key className="w-4 h-4 text-amber-400" /> Developer API Secret Key
-          </h2>
-          <p className="text-xs text-zinc-400">
-            Use this key to programmatically trigger Kling & Wan 2.1 renders via REST API.
-          </p>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="password"
-              readOnly
-              value={apiKey}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-purple-300 font-mono"
-            />
-            <button
-              type="button"
-              onClick={handleCopyKey}
-              className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 flex items-center gap-1.5"
-            >
-              {copiedKey ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copiedKey ? 'Copied' : 'Copy Key'}
-            </button>
-          </div>
-        </div>
-
-        {/* Preferences & Notifications */}
-        <div className="p-6 rounded-3xl glass-panel border border-zinc-800 space-y-4">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <Bell className="w-4 h-4 text-emerald-400" /> Notification Preferences
+            <Bell className="w-4 h-4 text-emerald-400" /> Notifications
           </h2>
 
           <div className="space-y-3 text-xs">
             <label className="flex items-center gap-3 text-zinc-300 cursor-pointer">
               <input type="checkbox" defaultChecked className="accent-purple-500 w-4 h-4 rounded" />
-              <span>Email notification when 4K Video render completes</span>
+              <span>Email me when a video generation completes</span>
             </label>
             <label className="flex items-center gap-3 text-zinc-300 cursor-pointer">
               <input type="checkbox" defaultChecked className="accent-purple-500 w-4 h-4 rounded" />
-              <span>Alert when credit balance drops below 20 credits</span>
+              <span>Alert me when credits drop below 20</span>
             </label>
             <label className="flex items-center gap-3 text-zinc-300 cursor-pointer">
               <input type="checkbox" defaultChecked className="accent-purple-500 w-4 h-4 rounded" />
-              <span>Weekly digest of new model releases (Kling, Wan 2.1 updates)</span>
+              <span>Weekly digest of new model releases</span>
             </label>
           </div>
         </div>
@@ -154,10 +134,11 @@ export const ProfileView: React.FC = () => {
           type="submit"
           className="px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-950"
         >
-          <Save className="w-4 h-4" /> Save Profile Settings
+          <Save className="w-4 h-4" /> Save changes
         </button>
 
       </form>
+      )}
 
     </div>
   );

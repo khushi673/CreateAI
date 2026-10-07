@@ -87,3 +87,22 @@
 .animate-spin-slow {
   animation: spinSlow 12s linear infinite;
 }
+
+@keyframes pop {
+  0% { transform: scale(0.92); opacity: 0.4; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.animate-pop {
+  animation: pop 0.35s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease-out;
+}

@@ -34,7 +34,7 @@ export const AuthModal: React.FC = () => {
         setCurrentScreen('admin');
         setAuthModalOpen(false);
         router.push('/admin');
-        addToast('Admin Authenticated', 'Welcome to AetherGen Central Control Panel', 'info');
+        addToast('Signed in as admin', 'Welcome to the admin panel', 'info');
         return;
       }
 
@@ -42,7 +42,7 @@ export const AuthModal: React.FC = () => {
       setCurrentScreen('dashboard');
       setAuthModalOpen(false);
       router.push('/');
-      addToast('Signed In', 'Welcome back to your Creator Workspace!', 'success');
+      addToast('Signed in', 'Welcome back', 'success');
       return;
     }
 
@@ -51,7 +51,7 @@ export const AuthModal: React.FC = () => {
       email: email || prev.email,
       name: name || prev.name,
     }));
-    addToast('Authentication Success', 'Account created successfully!', 'success');
+    addToast('Account created', 'Your account is ready', 'success');
     setAuthModalOpen(false);
     setCurrentScreen('dashboard');
   };
@@ -60,7 +60,7 @@ export const AuthModal: React.FC = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
       <div className="w-full max-w-md glass-panel rounded-3xl border border-zinc-800 p-6 sm:p-8 relative shadow-2xl overflow-hidden">
         
-        {/* Top Glow Accent */}
+        {/* Top accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-2 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 rounded-b-full blur-xs"></div>
 
         {/* Close Button */}
@@ -77,12 +77,12 @@ export const AuthModal: React.FC = () => {
             <Sparkles className="w-6 h-6 text-white" />
           </div>
           <h2 className="text-xl font-extrabold text-white">
-            {authMode === 'login' ? 'Welcome Back to AetherGen' : 'Create Your Creator Account'}
+            {authMode === 'login' ? 'Sign in to AetherGen' : 'Create your account'}
           </h2>
           <p className="text-xs text-zinc-400 mt-1">
             {authMode === 'login'
-              ? 'Enter your credentials to access your AI studio'
-              : 'Join over 48,000+ creators generating 4K AI video & graphics'}
+              ? 'Enter your email and password.'
+              : 'Get 50 free credits when you sign up.'}
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export const AuthModal: React.FC = () => {
               authMode === 'login' ? 'bg-purple-600 text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Sign In
+            Sign in
           </button>
           <button
             onClick={() => setAuthMode('signup')}
@@ -102,7 +102,7 @@ export const AuthModal: React.FC = () => {
               authMode === 'signup' ? 'bg-purple-600 text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Create Account
+            Create account
           </button>
         </div>
 
@@ -117,7 +117,7 @@ export const AuthModal: React.FC = () => {
                   : 'border-zinc-800 bg-zinc-900 text-zinc-300 hover:text-white'
               }`}
             >
-              User Sign In
+              User
             </button>
             <button
               type="button"
@@ -128,48 +128,16 @@ export const AuthModal: React.FC = () => {
                   : 'border-zinc-800 bg-zinc-900 text-zinc-300 hover:text-white'
               }`}
             >
-              Admin Sign In
+              Admin
             </button>
           </div>
         )}
-
-        {/* Social Quick Login */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <button
-            onClick={handleSubmit}
-            className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.39 7.37 24 12 24z" />
-              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.15z" />
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.37 0 3.26 2.61 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
-            </svg>
-            Google
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 transition-colors"
-          >
-            <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
-            GitHub
-          </button>
-        </div>
-
-        <div className="relative flex items-center justify-center mb-6">
-          <div className="border-t border-zinc-800 w-full"></div>
-          <span className="bg-zinc-950 px-3 text-[10px] text-zinc-400 font-bold uppercase tracking-wider absolute">
-            Or with email
-          </span>
-        </div>
 
         {/* Auth Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {authMode === 'signup' && (
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">Full Name</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Full name</label>
               <div className="relative">
                 <User className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -185,7 +153,7 @@ export const AuthModal: React.FC = () => {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">Email Address</label>
+            <label className="block text-xs font-medium text-zinc-300 mb-1">Email address</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -221,16 +189,16 @@ export const AuthModal: React.FC = () => {
             <span>
               {authMode === 'login'
                 ? selectedRole === 'admin'
-                  ? 'Sign In as Admin'
-                  : 'Sign In as User'
-                : 'Create Free Account (+50 Bonus Credits)'}
+                  ? 'Sign in as admin'
+                  : 'Sign in as user'
+                : 'Create account'}
             </span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
         <p className="text-[10px] text-zinc-400 text-center mt-6">
-          By continuing, you agree to AetherGen's Terms of Service and Privacy Policy.
+          Demo only: no password is checked.
         </p>
       </div>
     </div>
