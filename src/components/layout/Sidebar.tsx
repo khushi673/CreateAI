@@ -11,6 +11,7 @@ import {
   Zap,
   Settings,
   Columns3,
+  MessageSquare,
   Library,
   Users,
   X,
@@ -31,6 +32,7 @@ const GROUPS: { title: string; hint?: string; items: NavItem[] }[] = [
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { id: 'create', label: 'Create', icon: Wand2 },
+      { id: 'chat', label: 'Chat', icon: MessageSquare },
       { id: 'compare', label: 'Compare models', icon: Columns3 },
       { id: 'history', label: 'History', icon: History },
       { id: 'projects', label: 'Projects', icon: FolderKanban },

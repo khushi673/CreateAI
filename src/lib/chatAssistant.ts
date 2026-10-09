@@ -1,91 +1,78 @@
-import { ChatAction, MediaType } from '@/types';
+import { AIModel, MediaType } from '@/types';
 
-export interface ChatContextInfo {
-  credits: number;
-  generationCount: number;
-  projectNames: string[];
-  /** Cheapest active model of a type and what one default generation costs */
-  estimate: (type: MediaType) => { modelName: string; cost: number } | null;
+interface PromptRequest {
+  idea: string;
+  mediaType: MediaType;
+  model: AIModel;
+  /** The last prompt in this conversation, used for follow-up edits */
+  previous?: { text: string; negative?: string };
 }
 
-export interface ChatReply {
+interface PromptReply {
   text: string;
-  actions?: ChatAction[];
+  prompt?: { text: string; negative?: string };
 }
 
 const has = (t: string, ...words: string[]) => words.some((w) => t.includes(w));
+const clean = (s: string) => s.trim().replace(/[.\s]+$/, '');
 
-/** Simulated assistant: picks a canned answer by keyword. No AI runs. */
-export function chatReply(input: string, info: ChatContextInfo): ChatReply {
-  const t = input.toLowerCase();
+function refine(prev: string, ask: string): string {
+  const t = ask.toLowerCase();
+  if (has(t, 'shorter', 'shorten', 'simpler')) {
+    const first = prev.split(/[.]\s/)[0];
+    return first.split(' ').slice(0, 22).join(' ');
+  }
+  if (has(t, 'cinematic')) return `${clean(prev)}, cinematic lighting, anamorphic lens, film grain`;
+  if (has(t, 'detail', 'longer')) return `${clean(prev)}, highly detailed textures, sharp focus, rich atmosphere`;
+  const remove = /^(remove|without|no)\s+(.+)/i.exec(ask.trim());
+  if (remove) return clean(prev.replace(new RegExp(remove[2].replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'ig'), '')).replace(/\s{2,}/g, ' ');
+  const add = /^(add|with|plus)\s+(.+)/i.exec(ask.trim());
+  if (add) return `${clean(prev)}, ${clean(add[2])}`;
+  return `${clean(prev)}, ${clean(ask)}`;
+}
 
-  const type: MediaType | null = has(t, 'video', 'clip', 'animate', 'movie') ? 'video' : has(t, 'song', 'music', 'audio', 'sound', 'beat') ? 'audio' : has(t, 'image', 'picture', 'photo', 'portrait', 'draw', 'illustration', 'logo') ? 'image' : null;
-  const wantsCreate = has(t, 'generate', 'create', 'make', 'draw', 'design', 'produce', 'render');
+function build(idea: string, type: MediaType, model: AIModel): { text: string; negative?: string } {
+  const base = clean(idea).replace(/^(please\s+)?(can you\s+)?(write|give|create|make|generate)(\s+me)?(\s+a)?(n)?\s+(prompt\s+(for|of|about)\s+)?/i, '') || clean(idea);
+  const caps = model.capabilities;
+  const extras = (caps.extras ?? []).map((e) => `${e.label}: ${e.default}`).join('. ');
+  const negative = caps.negativePrompt ? 'blurry, low quality, distorted anatomy, watermark, text artifacts' : undefined;
 
-  if (type && wantsCreate) {
-    const e = info.estimate(type);
-    const prompt = input.replace(/^(please\s+)?(can you\s+)?(generate|create|make|draw|design|produce|render)\s+(me\s+)?(an?\s+)?/i, '').trim() || input;
+  if (type === 'video') {
+    const length = caps.durations?.[1] ?? caps.durations?.[0];
     return {
-      text: e
-        ? `I can make that ${type}. With ${e.modelName} it would cost about ${e.cost} credits. You can generate it now, or open Create to change the model and settings first.`
-        : `I can make that ${type}, but no model is available for it right now.`,
-      actions: e
-        ? [
-            { kind: 'generate', label: `Generate now · ${e.cost} credits`, mediaType: type, prompt },
-            { kind: 'create', label: 'Open in Create', mediaType: type, prompt },
-          ]
-        : undefined,
+      text: `${base}. Camera: slow tracking shot with smooth, natural motion. Lighting: cinematic, soft contrast. Style: realistic, high detail${extras ? '. ' + extras : ''}${length ? `. Length ${length}` : ''}.`,
+      negative,
     };
   }
-
-  if (has(t, 'credit', 'balance', 'cost', 'price', 'pricing', 'how much')) {
+  if (type === 'audio') {
+    const style = caps.audioStyles?.[0];
     return {
-      text: `You have ${info.credits.toLocaleString()} credits. Each generation shows its cost before you start. Failed generations are refunded automatically.`,
-      actions: [{ kind: 'open', label: 'Open Credits & plans', screen: 'credits' }],
+      text: `${base}. ${style ? `Style: ${style}. ` : ''}Mood: atmospheric and emotional. Tempo about 90 BPM. Instruments: warm synth pads, soft percussion, light bass. No vocals${caps.durations ? `. Length ${caps.durations[1] ?? caps.durations[0]}` : ''}.`,
     };
   }
-
-  if (has(t, 'history', 'last', 'previous', 'recent', 'my generation')) {
-    return {
-      text: info.generationCount ? `You have ${info.generationCount} generations. Open History to download, re-run or save any of them.` : 'You have not generated anything yet. Try asking me to make an image.',
-      actions: [{ kind: 'open', label: 'Open History', screen: 'history' }],
-    };
-  }
-
-  if (has(t, 'project', 'folder')) {
-    return {
-      text: info.projectNames.length ? `Your projects: ${info.projectNames.join(', ')}. Each project can have folders, for example one per outfit or scene.` : 'You have no projects yet. A project groups your work into folders.',
-      actions: [{ kind: 'open', label: 'Open Projects', screen: 'projects' }],
-    };
-  }
-
-  if (has(t, 'compare', 'which model', 'best model', 'difference')) {
-    return {
-      text: 'Compare runs one prompt on two or three models side by side, so you can pick the best result and see what each one costs.',
-      actions: [{ kind: 'open', label: 'Open Compare models', screen: 'compare' }],
-    };
-  }
-
-  if (has(t, 'reference', 'consistent', 'character', 'outfit', 'face')) {
-    return {
-      text: 'To keep a person or outfit consistent, add them as references and type @ in your prompt to use them. Models that accept several references work best.',
-      actions: [{ kind: 'open', label: 'Open References', screen: 'references' }],
-    };
-  }
-
-  if (has(t, 'prompt', 'tip', 'improve', 'better')) {
-    return {
-      text: 'A good prompt names the subject, the setting, the camera and the lighting. For example: "A woman in a red coat walking through a neon-lit street at night, slow tracking shot, shallow depth of field."',
-    };
-  }
-
-  if (has(t, 'hello', 'hi', 'hey', 'help', 'what can you')) {
-    return {
-      text: 'I can answer questions, help write prompts, and make images, video or audio for you. Try: "Generate an image of a golden retriever on a beach".',
-    };
-  }
-
   return {
-    text: 'Here is a short answer based on what you asked. In this demo the replies are simulated, but you can ask me to generate an image, video or audio and I will set it up for you.',
+    text: `${base}, shot on an 85mm lens, shallow depth of field, soft natural light, highly detailed, sharp focus${extras ? ', ' + extras.toLowerCase().replace(/\. /g, ', ') : ''}${caps.aspectRatios?.[0] ? `, ${caps.aspectRatios[0]} composition` : ''}`,
+    negative,
+  };
+}
+
+/** Simulated prompt writer: builds a prompt from keywords. No AI runs. */
+export function promptReply(req: PromptRequest): PromptReply {
+  const idea = req.idea.trim();
+  const t = idea.toLowerCase();
+
+  if (/^(hi|hello|hey|help|thanks|thank you)\b/.test(t) || idea.length < 4) {
+    return { text: 'I write prompts for the Create page. Describe what you want to make, for example “a golden retriever running on a beach at sunset”, then press “Use this prompt” to send it to Create.' };
+  }
+
+  const followUp = req.previous && /^(make it|more|less|shorter|shorten|simpler|longer|add|remove|without|with|plus|change|no)\b/i.test(idea);
+  if (followUp && req.previous) {
+    return { text: 'Updated the prompt.', prompt: { text: refine(req.previous.text, idea), negative: req.previous.negative } };
+  }
+
+  const out = build(idea, req.mediaType, req.model);
+  return {
+    text: `Here is a ${req.mediaType} prompt written for ${req.model.name}. You can ask me to change it, for example “make it more cinematic” or “add rain”.`,
+    prompt: out,
   };
 }

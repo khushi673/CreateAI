@@ -2,137 +2,187 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { PageHeader, Card, Stat, Badge, Table, Tr, Td, inputCls, money, num } from './ui';
-import { RevenueCostChart } from './charts';
+import { PageHeader, Card, Stat, Table, Tr, Td, Tabs, Modal, Field, inputCls, btnGhost, btnSmall, money, num } from './ui';
 import { DollarSign, Cpu, TrendingUp, Percent } from 'lucide-react';
-import { BASE_TOTALS, DATE_RANGES, MONTHLY_SERIES, PACK_UNITS_SOLD, MODEL_USAGE, CHAT_USAGE } from '@/data/adminMock';
+import { DATE_RANGES } from '@/data/adminMock';
+import { computeFinance } from '@/lib/finance';
+import { estimateCost } from '@/lib/pricing';
+import { AIModel, ChatModel } from '@/types';
 
-const usd = (n: number) => '$' + n.toFixed(2);
-const marginTone = (m: number) => (m >= 50 ? 'green' : m >= 25 ? 'amber' : 'red');
+const usd = (n: number) => '$' + (Math.abs(n) < 0.1 ? n.toFixed(3) : n.toFixed(2));
+const secs = (d?: string) => parseInt(d ?? '', 10) || 1;
+type Kind = 'all' | 'video' | 'image' | 'audio' | 'chat';
+
+/** One normalised row for an AI model or a chat model */
+interface Row {
+  id: string; name: string; kind: Exclude<Kind, 'all'>; status: string; chat: boolean;
+  /** Credits users spend per second / image / message, per resolution */
+  rates: { label: string; credits: number; unit: string }[];
+  example: string; exampleCredits: number;
+  baseCredits: number; baseProviderCost: number; baseLabel: string;
+}
+
+function toRow(m: AIModel | ChatModel, chat: boolean): Row {
+  if (chat) {
+    const c = m as ChatModel;
+    return {
+      id: c.id, name: c.name, kind: 'chat', status: c.status, chat: true,
+      rates: [{ label: 'Per message', credits: c.creditCost, unit: 'message' }],
+      example: '1 message', exampleCredits: c.creditCost,
+      baseCredits: c.creditCost, baseProviderCost: c.providerCost, baseLabel: '1 message',
+    };
+  }
+  const a = m as AIModel;
+  const kind = a.mediaTypes[0];
+  const caps = a.capabilities;
+  const baseDur = caps.durations?.[0];
+  const baseSecs = secs(baseDur);
+  const resFactor = (r: string) => a.costFactors.resolution?.[r] ?? 1;
+  const rates =
+    kind === 'image'
+      ? (caps.resolutions ?? []).map((r) => ({ label: r, credits: Math.round(a.creditCost * resFactor(r)), unit: 'image' }))
+      : kind === 'audio'
+        ? [{ label: 'Any length', credits: +(a.creditCost / baseSecs).toFixed(1), unit: 'sec' }]
+        : (caps.resolutions ?? []).map((r) => ({ label: r, credits: +((a.creditCost * resFactor(r)) / baseSecs).toFixed(1), unit: 'sec' }));
+  const exDur = caps.durations ? (caps.durations.includes('10s') ? '10s' : caps.durations.includes('30s') && kind === 'audio' ? '30s' : caps.durations[Math.min(1, caps.durations.length - 1)]) : undefined;
+  const exRes = caps.resolutions ? (caps.resolutions.includes('1080p') ? '1080p' : caps.resolutions[Math.min(1, caps.resolutions.length - 1)]) : undefined;
+  return {
+    id: a.id, name: a.name, kind, status: a.status, chat: false, rates,
+    example: [exDur ? exDur.replace('s', ' sec') : '1 image', exRes].filter(Boolean).join(' · '),
+    exampleCredits: estimateCost(a, exDur, exRes),
+    baseCredits: a.creditCost, baseProviderCost: a.providerCost,
+    baseLabel: [baseDur ? baseDur.replace('s', ' sec') : '1 generation', caps.resolutions?.[0]].filter(Boolean).join(' · '),
+  };
+}
 
 export const AdminAnalytics: React.FC = () => {
   const { creditPackages, models, chatModels, updateModel, updateChatModel } = useApp();
   const [rangeId, setRangeId] = useState('30d');
+  const [tab, setTab] = useState<Kind>('all');
+  const [detailId, setDetailId] = useState<string | null>(null);
   const f = DATE_RANGES.find((r) => r.id === rangeId)!.factor;
+  const fin = computeFinance(creditPackages, models, chatModels, f);
 
-  // Average provider cost per credit, derived from each model's cost and how much it is used
-  const usageRows = [
-    ...models.map((m) => ({ cost: m.providerCost, credits: m.creditCost, uses: MODEL_USAGE.find((u) => u.modelId === m.id)?.count ?? 0 })),
-    ...chatModels.map((m) => ({ cost: m.providerCost, credits: m.creditCost, uses: CHAT_USAGE[m.id] ?? 0 })),
-  ];
-  const usedCredits = usageRows.reduce((t, r) => t + r.credits * r.uses, 0);
-  const costPerCredit = usedCredits ? usageRows.reduce((t, r) => t + r.cost * r.uses, 0) / usedCredits : 0;
+  const rows = [...models.map((m) => toRow(m, false)), ...chatModels.map((m) => toRow(m, true))];
+  const shown = rows.filter((r) => tab === 'all' || r.kind === tab);
+  const detail = rows.find((r) => r.id === detailId);
 
-  const revenue = BASE_TOTALS.revenue * f;
-  const cost = BASE_TOTALS.cost * f;
-  const profit = revenue - cost;
-  const margin = (profit / revenue) * 100;
-  const series = MONTHLY_SERIES.map((d) => ({ ...d, revenue: d.revenue * (0.9 + f * 0.04), cost: d.cost * (0.9 + f * 0.04) }));
-
-  // Profit per credit pack = sale price - credits x provider cost per credit
-  const packRows = creditPackages.map((p) => {
-    const packCost = p.credits * costPerCredit;
-    const packProfit = p.price - packCost;
-    const sold = (PACK_UNITS_SOLD[p.id] ?? 0) * f;
-    return { pack: p, packCost, packProfit, marginPct: p.price ? (packProfit / p.price) * 100 : 0, sold };
-  });
-  const packTotals = packRows.reduce((t, r) => ({ revenue: t.revenue + r.pack.price * r.sold, cost: t.cost + r.packCost * r.sold }), { revenue: 0, cost: 0 });
-
-  // Profit per generation = credits charged x average sale price per credit - provider cost
-  const soldCredits = packRows.reduce((s, r) => s + r.pack.credits * r.sold, 0);
-  const avgPricePerCredit = soldCredits ? packTotals.revenue / soldCredits : 0;
-  const modelRows = [
-    ...models.map((m) => ({ id: m.id, name: m.name, per: 'per generation', creditCost: m.creditCost, providerCost: m.providerCost, chat: false })),
-    ...chatModels.map((m) => ({ id: m.id, name: m.name, per: 'per message', creditCost: m.creditCost, providerCost: m.providerCost, chat: true })),
-  ].map((m) => {
-    const revenuePerGen = m.creditCost * avgPricePerCredit;
-    const p = revenuePerGen - m.providerCost;
-    return { ...m, revenuePerGen, profit: p, marginPct: revenuePerGen ? (p / revenuePerGen) * 100 : 0 };
-  });
+  // Per-credit view of one model: what you pay the provider per credit, what the customer pays per credit
+  const calc = (r: Row) => {
+    const costPerCredit = r.baseCredits ? r.baseProviderCost / r.baseCredits : 0;
+    const customer = r.exampleCredits * fin.pricePerCredit;
+    const provider = r.exampleCredits * costPerCredit;
+    return { costPerCredit, customer, provider, profit: customer - provider, margin: customer ? ((customer - provider) / customer) * 100 : 0 };
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Cost vs revenue"
-        description="What you earn from credit sales, what you pay AI providers, and what is left."
+        description="What customers pay, what the AI providers cost you, and what you keep."
         actions={
-          <select value={rangeId} onChange={(e) => setRangeId(e.target.value)} className={inputCls + ' !w-auto'} aria-label="Date range">
+          <select value={rangeId} onChange={(e) => setRangeId(e.target.value)} className={inputCls + ' !w-auto'} aria-label="Period">
             {DATE_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
           </select>
         }
       />
 
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-        <Stat label="Revenue" value={money(revenue)} sub={`${num(BASE_TOTALS.creditsSold * f)} credits sold`} icon={<DollarSign className="w-4 h-4" />} tone="text-emerald-400" />
-        <Stat label="Paid to AI providers" value={money(cost)} sub={`${num(BASE_TOTALS.creditsUsed * f)} credits used`} icon={<Cpu className="w-4 h-4" />} tone="text-purple-400" />
-        <Stat label="Profit" value={money(profit)} icon={<TrendingUp className="w-4 h-4" />} tone="text-emerald-400" />
-        <Stat label="Margin" value={`${margin.toFixed(1)}%`} icon={<Percent className="w-4 h-4" />} tone="text-sky-400" />
+        <Stat label="Revenue" value={money(fin.revenue)} sub={`${num(fin.creditsSold)} credits sold`} icon={<DollarSign className="w-4 h-4" />} tone="text-emerald-400" />
+        <Stat label="Paid to AI providers" value={money(fin.providerCost)} sub={`${num(fin.creditsUsed)} credits used`} icon={<Cpu className="w-4 h-4" />} tone="text-purple-400" />
+        <Stat label="Profit" value={money(fin.profit)} icon={<TrendingUp className="w-4 h-4" />} tone="text-emerald-400" />
+        <Stat label="Margin" value={`${fin.margin.toFixed(1)}%`} icon={<Percent className="w-4 h-4" />} tone="text-sky-400" />
       </div>
 
-      <Card
-        title="Profit per credit pack"
-        subtitle={`Profit = sale price − your cost. Your cost uses the average provider cost of ${usd(costPerCredit * 1000)} per 1,000 credits, taken from the model costs below.`}
-      >
-        <Table head={['Credit pack', 'Sale price', 'Your cost', 'Profit']} empty={packRows.length === 0}>
-          {packRows.map((r) => (
-            <Tr key={r.pack.id}>
-              <Td>
-                <div className="font-bold text-white">{r.pack.name}</div>
-                <div className="text-[11px] text-zinc-500">{num(r.pack.credits)} credits</div>
-              </Td>
-              <Td>{usd(r.pack.price)}</Td>
-              <Td className="text-zinc-400">{usd(r.packCost)}</Td>
-              <Td>
-                <span className={`font-bold ${r.packProfit < 0 ? 'text-rose-300' : 'text-emerald-300'}`}>{usd(r.packProfit)}</span>{' '}
-                <Badge tone={marginTone(r.marginPct)}>{r.marginPct.toFixed(0)}%</Badge>
-              </Td>
+      <Card title="Credit packs" subtitle="What users pay for credits. Edit packs on the Credits page.">
+        <Table head={['Pack', 'Credits', 'Customer price']} empty={creditPackages.length === 0}>
+          {creditPackages.map((p) => (
+            <Tr key={p.id}>
+              <Td className="font-bold text-white">{p.name}</Td>
+              <Td>{num(p.credits)}</Td>
+              <Td>{usd(p.price)}</Td>
             </Tr>
           ))}
         </Table>
-        <p className="mt-4 pt-4 border-t border-zinc-800 text-xs text-zinc-400">
-          Total profit from pack sales in this period: <strong className="text-emerald-300">{money(packTotals.revenue - packTotals.cost)}</strong>
-        </p>
+        {creditPackages[1] && <p className="mt-3 text-xs text-zinc-500">Example: {num(creditPackages[1].credits)} credits = {usd(creditPackages[1].price)}</p>}
       </Card>
 
-      <Card title="Profit per model" subtitle="Change what you pay the provider and everything on this page updates.">
-        <Table head={['Model', 'You earn', 'You pay the provider (USD)', 'Profit']} empty={modelRows.length === 0}>
-          {modelRows.map((r) => (
-            <Tr key={r.id}>
-              <Td>
-                <div className="font-bold text-white">{r.name}</div>
-                <div className="text-[11px] text-zinc-500">{r.per}</div>
-              </Td>
-              <Td>{usd(r.revenuePerGen)}</Td>
-              <Td>
-                <div className="relative w-28">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
-                  <input
-                    type="number"
-                    min={0}
-                    step="0.001"
-                    defaultValue={r.providerCost}
-                    onChange={(e) => {
-                      const v = Math.max(0, Number(e.target.value) || 0);
-                      if (r.chat) updateChatModel(r.id, { providerCost: v });
-                      else updateModel(r.id, { providerCost: v });
-                    }}
-                    aria-label={`Provider cost for ${r.name}`}
-                    className={inputCls + ' !pl-6 !py-1.5 font-mono'}
-                  />
+      <section className="space-y-4">
+        <Tabs
+          tabs={[{ id: 'all', label: 'All models' }, { id: 'video', label: 'Video' }, { id: 'image', label: 'Image' }, { id: 'audio', label: 'Audio' }, { id: 'chat', label: 'Chat' }]}
+          value={tab}
+          onChange={(id) => setTab(id as Kind)}
+        />
+
+        <div>
+          <h2 className="text-sm font-extrabold text-white">AI model pricing and profit</h2>
+          <p className="text-[11px] text-zinc-500 mt-0.5">Credits users spend on each model, and for the example generation: what the customer pays, what the provider costs you, and what you keep.</p>
+        </div>
+        <Table head={['Model', 'Credits', 'Example', 'Customer pays', 'Provider cost', 'Profit', '']} empty={shown.length === 0}>
+          {shown.map((r) => {
+            const c = calc(r);
+            return (
+              <Tr key={r.id}>
+                <Td>
+                  <div className="font-bold text-white">{r.name}</div>
+                  <div className="text-[11px] text-zinc-500 capitalize">{r.kind} · {r.status}</div>
+                </Td>
+                <Td>
+                  {r.rates.map((x) => (
+                    <div key={x.label} className="text-xs whitespace-nowrap">
+                      <span className="text-zinc-500">{x.label}: </span>
+                      <span className="font-semibold text-zinc-200">{x.credits}/{x.unit}</span>
+                    </div>
+                  ))}
+                </Td>
+                <Td>
+                  <div className="text-zinc-300">{r.example}</div>
+                  <div className="text-[11px] text-zinc-500">{r.exampleCredits} credits</div>
+                </Td>
+                <Td>{usd(c.customer)}</Td>
+                <Td className="text-zinc-400">{usd(c.provider)}</Td>
+                <Td><span className={`font-bold ${c.profit < 0 ? 'text-rose-300' : 'text-emerald-300'}`}>{usd(c.profit)}</span></Td>
+                <Td><button className={btnSmall} onClick={() => setDetailId(r.id)}>View details</button></Td>
+              </Tr>
+            );
+          })}
+        </Table>
+      </section>
+
+      {detail && (() => {
+        const c = calc(detail);
+        const setProvider = (v: number) => {
+          const cost = Math.max(0, v);
+          if (detail.chat) updateChatModel(detail.id, { providerCost: cost });
+          else updateModel(detail.id, { providerCost: cost });
+        };
+        return (
+          <Modal title={`${detail.name} – cost details`} onClose={() => setDetailId(null)} footer={<button className={btnGhost} onClick={() => setDetailId(null)}>Close</button>}>
+            <Field label={`What the provider charges you for ${detail.baseLabel} ($)`} hint="Change this and every figure on this page updates.">
+              <input
+                type="number" min={0} step="0.001" defaultValue={detail.baseProviderCost} className={inputCls + ' font-mono'}
+                onChange={(e) => setProvider(Number(e.target.value) || 0)}
+              />
+            </Field>
+            <dl className="text-xs divide-y divide-zinc-800 border border-zinc-800 rounded-xl">
+              {[
+                [`Example generation`, `${detail.example} = ${detail.exampleCredits} credits`],
+                ['Customer pays (credits × average price per credit)', `${usd(detail.exampleCredits * fin.pricePerCredit)}`],
+                ['Provider cost per credit', usd(c.costPerCredit)],
+                ['Provider cost for the example', usd(c.provider)],
+                ['Your profit', usd(c.profit)],
+                ['Margin', `${c.margin.toFixed(0)}%`],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <dt className="text-zinc-400">{k}</dt>
+                  <dd className="font-bold text-white text-right">{v}</dd>
                 </div>
-              </Td>
-              <Td>
-                <span className={`font-bold ${r.profit < 0 ? 'text-rose-300' : 'text-emerald-300'}`}>{usd(r.profit)}</span>{' '}
-                <Badge tone={marginTone(r.marginPct)}>{r.marginPct.toFixed(0)}%</Badge>
-              </Td>
-            </Tr>
-          ))}
-        </Table>
-      </Card>
-
-      <Card title="Revenue vs cost" subtitle="Last 6 months">
-        <RevenueCostChart data={series} />
-      </Card>
+              ))}
+            </dl>
+            <p className="text-[11px] text-zinc-500">Average price per credit: {usd(fin.pricePerCredit)}, taken from the credit packs sold.</p>
+          </Modal>
+        );
+      })()}
     </div>
   );
 };

@@ -136,17 +136,6 @@ export const DATE_RANGES: RangeOption[] = [
   { id: '12m', label: 'Last 12 months', factor: 11.2 },
 ];
 
-export const MONTHLY_SERIES = [
-  { month: 'May', revenue: 18400, cost: 9800 },
-  { month: 'Jun', revenue: 21200, cost: 11300 },
-  { month: 'Jul', revenue: 24900, cost: 13900 },
-  { month: 'Aug', revenue: 27800, cost: 15200 },
-  { month: 'Sep', revenue: 31500, cost: 16800 },
-  { month: 'Oct', revenue: 36200, cost: 18900 },
-];
-
-export const BASE_TOTALS = { revenue: 36200, cost: 18900, creditsSold: 410000, creditsUsed: 362000 };
-
 /** Packs sold in the selected period (by credit pack id) */
 export const PACK_UNITS_SOLD: Record<string, number> = {
   pkg_starter: 410,
@@ -192,6 +181,8 @@ export const MODEL_USAGE: { modelId: string; count: number }[] = [
 ];
 
 /** Chat messages sent in the selected period, by chat model id (used to weight provider cost) */
+
+/** Chat messages sent per chat model in the period (mock) */
 export const CHAT_USAGE: Record<string, number> = {
   'chat-fast': 2400,
   'chat-balanced': 1500,

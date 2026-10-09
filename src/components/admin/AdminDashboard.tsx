@@ -4,8 +4,9 @@ import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { Users, Sparkles, DollarSign, Activity, AlertTriangle } from 'lucide-react';
 import { PageHeader, Card, Stat, money, num } from './ui';
-import { MONTHLY_SERIES, INITIAL_JOBS, INITIAL_FAILED, INITIAL_REFUNDS, DAILY_GENERATIONS, MODEL_USAGE } from '@/data/adminMock';
+import { INITIAL_JOBS, INITIAL_FAILED, INITIAL_REFUNDS, DAILY_GENERATIONS, MODEL_USAGE } from '@/data/adminMock';
 import { getModel } from '@/data/mockData';
+import { computeFinance } from '@/lib/finance';
 
 const STATUSES = [
   { status: 'Completed', bar: 'bg-emerald-500' },
@@ -15,12 +16,12 @@ const STATUSES = [
 ] as const;
 
 export const AdminDashboard: React.FC = () => {
-  const { adminUsers } = useApp();
+  const { adminUsers, creditPackages, models, chatModels } = useApp();
   const totalGens = adminUsers.reduce((s, u) => s + u.totalGenerations, 0);
   const active = INITIAL_JOBS.filter((j) => j.status === 'Queued' || j.status === 'Processing').length;
   const failed = INITIAL_JOBS.filter((j) => j.status === 'Failed').length;
   const failRate = ((failed / INITIAL_JOBS.length) * 100).toFixed(1);
-  const last = MONTHLY_SERIES[MONTHLY_SERIES.length - 1];
+  const fin = computeFinance(creditPackages, models, chatModels);
 
   const dailyMax = Math.max(...DAILY_GENERATIONS.map((d) => d.count));
   const usageMax = Math.max(...MODEL_USAGE.map((m) => m.count));
@@ -39,7 +40,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         <Stat label="Users" value={num(adminUsers.length)} sub={`${adminUsers.filter((u) => u.status === 'Active').length} active`} icon={<Users className="w-4 h-4" />} />
         <Stat label="Generations" value={num(totalGens)} icon={<Sparkles className="w-4 h-4" />} />
-        <Stat label="Revenue (month)" value={money(last.revenue)} sub={`AI cost ${money(last.cost)}`} icon={<DollarSign className="w-4 h-4" />} tone="text-emerald-400" />
+        <Stat label="Revenue (30 days)" value={money(fin.revenue)} sub={`Paid to providers ${money(fin.providerCost)}`} icon={<DollarSign className="w-4 h-4" />} tone="text-emerald-400" />
         <Stat label="Active generations" value={String(active)} sub="Queued and processing" icon={<Activity className="w-4 h-4" />} tone="text-sky-400" />
         <Stat label="Failure rate" value={`${failRate}%`} sub={`${failed} of ${INITIAL_JOBS.length} recent generations`} icon={<AlertTriangle className="w-4 h-4" />} tone="text-amber-400" />
       </div>

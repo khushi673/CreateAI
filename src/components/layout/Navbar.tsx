@@ -11,7 +11,6 @@ import {
 
 export const Navbar: React.FC = () => {
   const { 
-    currentScreen, 
     setCurrentScreen, 
     user, 
     logout,
@@ -19,7 +18,6 @@ export const Navbar: React.FC = () => {
   } = useApp();
 
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const isLanding = currentScreen === 'landing';
 
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80  py-3 transition-all duration-200">
@@ -27,17 +25,15 @@ export const Navbar: React.FC = () => {
         
         {/* Brand / Logo */}
         <div className="flex items-center gap-3 lg:gap-6">
-          {!isLanding && (
-            <button
-              onClick={() => setMobileNavOpen(true)}
-              className="md:hidden p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300"
-              aria-label="Open menu"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={() => setMobileNavOpen(true)}
+            className="md:hidden p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300"
+            aria-label="Open menu"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
           <button 
-            onClick={() => setCurrentScreen('landing')}
+            onClick={() => setCurrentScreen('dashboard')}
             className="flex items-center gap-2.5 group text-left focus:outline-none"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform">

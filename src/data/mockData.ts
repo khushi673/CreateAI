@@ -1,6 +1,7 @@
 import {
   ModelApiKey,
   ChatModel,
+  ChatConversation,
   AIModel,
   GenerationItem,
   Project,
@@ -72,7 +73,7 @@ export const AI_MODELS: AIModel[] = [
     supports: ['Text-to-Video', 'Image-to-Video', 'Start/End Frame'],
     capabilities: {
       durations: ['5s', '10s', '15s', '30s'],
-      resolutions: ['720p', '1080p'],
+      resolutions: ['720p', '1080p', '4K'],
       aspectRatios: ['16:9', '9:16', '1:1', '4:3'],
       seed: true,
       negativePrompt: true,
@@ -81,7 +82,7 @@ export const AI_MODELS: AIModel[] = [
       endFrame: true,
       extras: [{ key: 'camera', label: 'Camera Control', options: ['Auto', 'Static', 'Pan', 'Orbit', 'Zoom In'], default: 'Auto' }],
     },
-    costFactors: { duration: { '5s': 1, '10s': 2, '15s': 3, '30s': 5.5 }, resolution: { '720p': 1, '1080p': 1.5 } },
+    costFactors: { duration: { '5s': 1, '10s': 2, '15s': 3, '30s': 5.5 }, resolution: { '720p': 1, '1080p': 1.5, '4K': 3 } },
   },
   {
     id: 'seedance-2-5',
@@ -99,7 +100,7 @@ export const AI_MODELS: AIModel[] = [
     supports: ['Text-to-Video', 'Image-to-Video', 'Multi-Reference'],
     capabilities: {
       durations: ['5s', '10s', '15s'],
-      resolutions: ['720p', '1080p', '2K'],
+      resolutions: ['720p', '1080p', '4K'],
       aspectRatios: ['16:9', '9:16', '1:1', '21:9'],
       seed: true,
       negativePrompt: false,
@@ -108,7 +109,7 @@ export const AI_MODELS: AIModel[] = [
       endFrame: false,
       extras: [{ key: 'motion', label: 'Motion Strength', options: ['Low', 'Medium', 'High'], default: 'Medium' }],
     },
-    costFactors: { duration: { '5s': 1, '10s': 2, '15s': 3 }, resolution: { '720p': 1, '1080p': 1.5, '2K': 2.2 } },
+    costFactors: { duration: { '5s': 1, '10s': 2, '15s': 3 }, resolution: { '720p': 1, '1080p': 1.5, '4K': 3 } },
   },
   {
     id: 'wan-3',
@@ -126,7 +127,7 @@ export const AI_MODELS: AIModel[] = [
     supports: ['Text-to-Video', 'Image-to-Video', 'Start/End Frame'],
     capabilities: {
       durations: ['5s', '10s'],
-      resolutions: ['480p', '720p', '1080p'],
+      resolutions: ['720p', '1080p', '4K'],
       aspectRatios: ['16:9', '9:16', '1:1'],
       seed: true,
       negativePrompt: true,
@@ -135,7 +136,7 @@ export const AI_MODELS: AIModel[] = [
       endFrame: true,
       extras: [{ key: 'style', label: 'Visual Style', options: ['Cinematic', 'Realistic', 'Anime'], default: 'Cinematic' }],
     },
-    costFactors: { duration: { '5s': 1, '10s': 2 }, resolution: { '480p': 0.6, '720p': 1, '1080p': 1.5 } },
+    costFactors: { duration: { '5s': 1, '10s': 2 }, resolution: { '720p': 1, '1080p': 1.5, '4K': 3 } },
   },
   {
     id: 'luma-ray-3',
@@ -152,7 +153,7 @@ export const AI_MODELS: AIModel[] = [
     supports: ['Text-to-Video', 'Image-to-Video'],
     capabilities: {
       durations: ['5s', '10s'],
-      resolutions: ['720p', '1080p'],
+      resolutions: ['720p', '1080p', '4K'],
       aspectRatios: ['16:9', '9:16', '1:1'],
       seed: false,
       negativePrompt: false,
@@ -160,7 +161,7 @@ export const AI_MODELS: AIModel[] = [
       startFrame: true,
       endFrame: false,
     },
-    costFactors: { duration: { '5s': 1, '10s': 2 }, resolution: { '720p': 1, '1080p': 1.4 } },
+    costFactors: { duration: { '5s': 1, '10s': 2 }, resolution: { '720p': 1, '1080p': 1.4, '4K': 3 } },
   },
   {
     id: 'nano-banana',
@@ -177,14 +178,14 @@ export const AI_MODELS: AIModel[] = [
     providerCost: 0.22,
     supports: ['Text-to-Image', 'Image Editing', 'Multi-Reference'],
     capabilities: {
-      resolutions: ['1K', '2K', '4K'],
+      resolutions: ['512px', '1K', '2K', '4K'],
       aspectRatios: ['1:1', '16:9', '9:16', '4:5', '3:2'],
       seed: true,
       negativePrompt: true,
       maxReferenceImages: 6,
       extras: [{ key: 'style', label: 'Style', options: ['Photoreal', 'Illustration', '3D Render'], default: 'Photoreal' }],
     },
-    costFactors: { resolution: { '1K': 1, '2K': 1.5, '4K': 2.5 } },
+    costFactors: { resolution: { '512px': 0.5, '1K': 1, '2K': 1.5, '4K': 2.5 } },
   },
   {
     id: 'flux-2-pro',
@@ -200,13 +201,13 @@ export const AI_MODELS: AIModel[] = [
     providerCost: 0.35,
     supports: ['Text-to-Image'],
     capabilities: {
-      resolutions: ['1K', '2K'],
+      resolutions: ['1K', '2K', '4K'],
       aspectRatios: ['1:1', '16:9', '9:16', '4:3'],
       seed: true,
       negativePrompt: true,
       maxReferenceImages: 2,
     },
-    costFactors: { resolution: { '1K': 1, '2K': 1.6 } },
+    costFactors: { resolution: { '1K': 1, '2K': 1.6, '4K': 2.8 } },
   },
   {
     id: 'suno-5',
@@ -742,3 +743,42 @@ export const INITIAL_MODEL_KEYS: Record<string, ModelApiKey> = {
   'suno-5': { apiKey: demoKey('suno', 'r1a47fjs'), updatedAt: 'Sep 18, 2026' },
   'stable-audio-3': { apiKey: demoKey('stable', 'g8u60lbo'), updatedAt: 'Aug 30, 2026' },
 };
+
+// ---------- Chat history (prompt assistant) ----------
+const NOW = 1760000000000;
+export const INITIAL_CHATS: ChatConversation[] = [
+  {
+    id: 'chat_seed1',
+    title: 'Neon city video prompt',
+    updatedAt: NOW - 3600_000,
+    messages: [
+      { id: 'cm1', role: 'user', text: 'Write a prompt for a woman walking through a neon city at night', cost: 5, modelName: 'GPT-5 mini' },
+      {
+        id: 'cm2', role: 'assistant', modelName: 'GPT-5 mini',
+        text: 'Here is a video prompt written for Kling 4.0. You can ask me to change it, for example “make it more cinematic” or “add rain”.',
+        prompt: {
+          text: 'A woman walking through a neon city at night. Camera: slow tracking shot with smooth, natural motion. Lighting: cinematic, soft contrast. Style: realistic, high detail. Camera Control: Auto. Length 10s.',
+          negative: 'blurry, low quality, distorted anatomy, watermark, text artifacts',
+          mediaType: 'video', targetModelId: 'kling-4', targetModelName: 'Kling 4.0',
+        },
+      },
+    ],
+  },
+  {
+    id: 'chat_seed2',
+    title: 'Perfume bottle product shot',
+    updatedAt: NOW - 86_400_000,
+    messages: [
+      { id: 'cm3', role: 'user', text: 'A crystal perfume bottle with orchid petals', cost: 2, modelName: 'Gemini 3 Flash' },
+      {
+        id: 'cm4', role: 'assistant', modelName: 'Gemini 3 Flash',
+        text: 'Here is an image prompt written for Nano Banana. You can ask me to change it, for example “make it more cinematic” or “add rain”.',
+        prompt: {
+          text: 'A crystal perfume bottle with orchid petals, shot on an 85mm lens, shallow depth of field, soft natural light, highly detailed, sharp focus, style: photoreal, 1:1 composition',
+          negative: 'blurry, low quality, distorted anatomy, watermark, text artifacts',
+          mediaType: 'image', targetModelId: 'nano-banana', targetModelName: 'Nano Banana',
+        },
+      },
+    ],
+  },
+];

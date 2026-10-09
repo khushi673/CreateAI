@@ -6,18 +6,16 @@ import { useApp } from '@/context/AppContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ToastContainer } from '@/components/common/Toast';
-import { AuthModal } from '@/components/modals/AuthModal';
 import { BuyCreditsModal } from '@/components/modals/BuyCreditsModal';
 import { SaveToProjectModal } from '@/components/modals/SaveToProjectModal';
 import { NewProjectModal } from '@/components/modals/NewProjectModal';
 
 // Views
 import { SignInView } from '@/components/views/SignInView';
-import { LandingView } from '@/components/views/LandingView';
 import { DashboardView } from '@/components/views/DashboardView';
 import { CreateView } from '@/components/views/CreateView';
 import { ResultView } from '@/components/views/ResultView';
-import { ChatPanel } from '@/components/chat/ChatPanel';
+import { ChatView } from '@/components/views/ChatView';
 import { CompareView } from '@/components/views/CompareView';
 import { ReferenceLibraryView } from '@/components/views/ReferenceLibraryView';
 import { HistoryView } from '@/components/views/HistoryView';
@@ -49,38 +47,29 @@ function AppContent() {
     );
   }
 
-  const isLanding = currentScreen === 'landing';
-
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col selection:bg-purple-600 selection:text-white">
       <Navbar />
 
-      {isLanding ? (
-        <main className="flex-1">
-          <LandingView />
+      <div className="flex-1 flex max-w-[1600px] w-full mx-auto">
+        <Sidebar />
+
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+          {currentScreen === 'dashboard' && <DashboardView />}
+          {currentScreen === 'create' && <CreateView />}
+          {currentScreen === 'result' && <ResultView />}
+          {currentScreen === 'chat' && <ChatView />}
+          {currentScreen === 'compare' && <CompareView />}
+          {currentScreen === 'references' && <ReferenceLibraryView />}
+          {currentScreen === 'history' && <HistoryView />}
+          {currentScreen === 'projects' && <ProjectsView />}
+          {currentScreen === 'project-detail' && <ProjectDetailView />}
+          {currentScreen === 'collaboration' && <CollaborationView />}
+          {currentScreen === 'credits' && <CreditsView />}
+          {currentScreen === 'profile' && <ProfileView />}
         </main>
-      ) : (
-        <div className="flex-1 flex max-w-[1600px] w-full mx-auto">
-          <Sidebar />
+      </div>
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
-            {currentScreen === 'dashboard' && <DashboardView />}
-            {currentScreen === 'create' && <CreateView />}
-            {currentScreen === 'result' && <ResultView />}
-            {currentScreen === 'compare' && <CompareView />}
-            {currentScreen === 'references' && <ReferenceLibraryView />}
-            {currentScreen === 'history' && <HistoryView />}
-            {currentScreen === 'projects' && <ProjectsView />}
-            {currentScreen === 'project-detail' && <ProjectDetailView />}
-            {currentScreen === 'collaboration' && <CollaborationView />}
-            {currentScreen === 'credits' && <CreditsView />}
-            {currentScreen === 'profile' && <ProfileView />}
-          </main>
-        </div>
-      )}
-
-      <ChatPanel />
-      <AuthModal />
       <BuyCreditsModal />
       <SaveToProjectModal />
       <NewProjectModal />

@@ -1,9 +1,9 @@
 export type ViewScreen =
-  | 'landing'
   | 'auth'
   | 'dashboard'
   | 'create'
   | 'result'
+  | 'chat'
   | 'compare'
   | 'references'
   | 'history'
@@ -268,17 +268,34 @@ export interface ChatModel {
   supports: string[];
 }
 
-export type ChatAction =
-  | { kind: 'open'; label: string; screen: ViewScreen }
-  | { kind: 'generate'; label: string; mediaType: MediaType; prompt: string }
-  | { kind: 'create'; label: string; mediaType: MediaType; prompt: string };
+/** A prompt written by the assistant for a specific media type and model */
+export interface ChatPrompt {
+  text: string;
+  negative?: string;
+  mediaType: MediaType;
+  targetModelId: string;
+  targetModelName: string;
+}
 
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   text: string;
-  /** Credits charged for this exchange (on the user message) */
+  /** Credits charged for this message (on the user message) */
   cost?: number;
   modelName?: string;
-  actions?: ChatAction[];
+  prompt?: ChatPrompt;
+}
+
+export interface ChatConversation {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  updatedAt: number;
+}
+
+/** What the prompt should be written for */
+export interface ChatTarget {
+  mediaType: MediaType;
+  modelId: string;
 }

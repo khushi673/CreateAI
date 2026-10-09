@@ -26,6 +26,9 @@ import {
   ModelApiKey,
   ChatModel,
   ChatMessage,
+  ChatConversation,
+  ChatPrompt,
+  ChatTarget,
 } from '@/types';
 import {
   AI_MODELS,
@@ -45,8 +48,9 @@ import {
   getModel,
   INITIAL_MODEL_KEYS,
   CHAT_MODELS,
+  INITIAL_CHATS,
 } from '@/data/mockData';
-import { chatReply } from '@/lib/chatAssistant';
+import { promptReply } from '@/lib/chatAssistant';
 import { estimateCost } from '@/lib/pricing';
 
 interface AppContextType {
@@ -74,19 +78,23 @@ interface AppContextType {
   toggleModelStatus: (modelId: string) => void;
   updateModel: (modelId: string, patch: Partial<AIModel>) => void;
 
-  // Chat assistant
-  chatOpen: boolean;
-  setChatOpen: (open: boolean) => void;
+  // Chat (prompt assistant)
   chatModels: ChatModel[];
   updateChatModel: (modelId: string, patch: Partial<ChatModel>) => void;
   toggleChatModelStatus: (modelId: string) => void;
+  chatConversations: ChatConversation[];
+  activeChatId: string | null;
+  /** Messages of the open conversation (empty for a new chat) */
   chatMessages: ChatMessage[];
   chatTyping: boolean;
-  /** Charges the model's per-message cost, then adds the simulated reply */
-  sendChatMessage: (text: string, modelId: string) => void;
-  clearChat: () => void;
-  /** Sets up Create with a prompt on the best active model and starts generating */
-  quickGenerate: (mediaType: MediaType, prompt: string) => void;
+  newChat: () => void;
+  selectChat: (id: string) => void;
+  deleteChat: (id: string) => void;
+  renameChat: (id: string, title: string) => void;
+  /** Charges the chat model's per-message cost, then adds the simulated prompt reply */
+  sendChatMessage: (text: string, modelId: string, target: ChatTarget) => void;
+  /** Puts an assistant-written prompt into Create */
+  sendPromptToCreate: (prompt: ChatPrompt) => void;
 
   // Studio form
   mediaType: MediaType;
@@ -176,10 +184,6 @@ interface AppContextType {
   revokeApiKey: (id: string) => void;
 
   // Modals
-  authModalOpen: boolean;
-  setAuthModalOpen: (open: boolean) => void;
-  authMode: 'login' | 'signup';
-  setAuthMode: (mode: 'login' | 'signup') => void;
   buyCreditsModalOpen: boolean;
   setBuyCreditsModalOpen: (open: boolean) => void;
   saveToProjectModalOpen: boolean;
@@ -251,9 +255,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Chat
   const [chatModels, setChatModels] = useState<ChatModel[]>(CHAT_MODELS);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatConversations, setChatConversations] = useState<ChatConversation[]>(INITIAL_CHATS);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [chatTyping, setChatTyping] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  const chatMessages = chatConversations.find((c) => c.id === activeChatId)?.messages ?? [];
 
   // Models
   const [models, setModels] = useState<AIModel[]>(AI_MODELS);
@@ -296,8 +301,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>([]);
 
   // Modals
-  const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [buyCreditsModalOpen, setBuyCreditsModalOpen] = useState<boolean>(false);
   const [saveToProjectModalOpen, setSaveToProjectModalOpen] = useState<boolean>(false);
   const [targetAssetForProject, setTargetAssetForProject] = useState<GenerationItem | null>(null);
@@ -448,9 +451,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToast(`${m.name} ${next === 'Active' ? 'enabled' : 'disabled'}`, next === 'Active' ? 'Users can select it in Chat.' : 'Hidden from Chat.', next === 'Active' ? 'success' : 'warning');
   };
 
-  const clearChat = () => setChatMessages([]);
+  const newChat = () => setActiveChatId(null);
+  const selectChat = (id: string) => setActiveChatId(id);
+  const deleteChat = (id: string) => {
+    setChatConversations((prev) => prev.filter((c) => c.id !== id));
+    setActiveChatId((cur) => (cur === id ? null : cur));
+  };
+  const renameChat = (id: string, title: string) =>
+    setChatConversations((prev) => prev.map((c) => (c.id === id && title.trim() ? { ...c, title: title.trim() } : c)));
 
-  const sendChatMessage = (text: string, modelId: string) => {
+  const sendChatMessage = (text: string, modelId: string, target: ChatTarget) => {
     const model = chatModels.find((m) => m.id === modelId);
     const msg = text.trim();
     if (!model || !msg || chatTyping) return;
@@ -462,66 +472,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addToast('Not enough credits', `${model.name} costs ${model.creditCost} credits per message. Add credits in Credits & plans.`, 'warning');
       return;
     }
+    const targetModel = models.find((m) => m.id === target.modelId) ?? models.find((m) => m.mediaTypes.includes(target.mediaType));
+    if (!targetModel) {
+      addToast('No model available', `No ${target.mediaType} model is enabled right now.`, 'warning');
+      return;
+    }
     setUser((prev) => ({ ...prev, credits: prev.credits - model.creditCost }));
     setAdminUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, credits: Math.max(0, u.credits - model.creditCost) } : u)));
     logTransaction({ kind: 'charge', title: `Chat — ${model.name}`, detail: '1 message', amount: -model.creditCost });
-    setChatMessages((prev) => [...prev, { id: 'msg_' + Date.now(), role: 'user', text: msg, cost: model.creditCost, modelName: model.name }]);
+
+    const convId = activeChatId ?? 'chat_' + Date.now();
+    const userMsg: ChatMessage = { id: 'msg_' + Date.now(), role: 'user', text: msg, cost: model.creditCost, modelName: model.name };
+    const existing = chatConversations.find((c) => c.id === convId);
+    const lastPrompt = [...(existing?.messages ?? [])].reverse().find((m) => m.prompt)?.prompt;
+    if (existing) {
+      setChatConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, messages: [...c.messages, userMsg], updatedAt: Date.now() } : c)));
+    } else {
+      setChatConversations((prev) => [{ id: convId, title: msg.length > 40 ? msg.slice(0, 40) + '…' : msg, messages: [userMsg], updatedAt: Date.now() }, ...prev]);
+      setActiveChatId(convId);
+    }
     setChatTyping(true);
 
-    const cheapest = (type: MediaType) => {
-      const m = models.filter((x) => x.mediaTypes.includes(type) && x.status === 'Active').sort((a, b) => a.creditCost - b.creditCost)[0];
-      if (!m) return null;
-      const d = defaultsFor(m);
-      return { modelName: m.name, cost: estimateCost(m, m.capabilities.durations ? d.duration : undefined, m.capabilities.resolutions ? d.resolution : undefined) };
-    };
-    const reply = chatReply(msg, {
-      credits: user.credits - model.creditCost,
-      generationCount: generations.length,
-      projectNames: projects.map((p) => p.name),
-      estimate: cheapest,
-    });
+    const reply = promptReply({ idea: msg, mediaType: target.mediaType, model: targetModel, previous: lastPrompt });
     setTimeout(() => {
-      setChatMessages((prev) => [...prev, { id: 'msg_' + Date.now() + 'a', role: 'assistant', text: reply.text, modelName: model.name, actions: reply.actions }]);
+      const assistantMsg: ChatMessage = {
+        id: 'msg_' + Date.now() + 'a',
+        role: 'assistant',
+        text: reply.text,
+        modelName: model.name,
+        prompt: reply.prompt
+          ? { text: reply.prompt.text, negative: reply.prompt.negative, mediaType: target.mediaType, targetModelId: targetModel.id, targetModelName: targetModel.name }
+          : undefined,
+      };
+      setChatConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, messages: [...c.messages, assistantMsg], updatedAt: Date.now() } : c)));
       setChatTyping(false);
-    }, 1100);
+    }, 1000);
   };
 
-  const quickGenerate = (type: MediaType, promptText: string) => {
-    const model = models.filter((m) => m.mediaTypes.includes(type) && m.status === 'Active').sort((a, b) => a.creditCost - b.creditCost)[0];
-    if (!model) {
-      addToast('No model available', `No ${type} model is enabled right now.`, 'warning');
-      return;
-    }
-    const d = defaultsFor(model);
-    setMediaTypeState(type);
+  const sendPromptToCreate = (p: ChatPrompt) => {
+    const model = models.find((m) => m.id === p.targetModelId && m.status !== 'Disabled') ?? models.find((m) => m.mediaTypes.includes(p.mediaType) && m.status === 'Active');
+    setMediaTypeState(p.mediaType);
     setImageToVideoState(false);
-    setSelectedModelState(model);
-    applyModelDefaults(model);
-    setPrompt(promptText);
-    setStartFrame(null);
-    setEndFrame(null);
+    if (model) {
+      setSelectedModelState(model);
+      applyModelDefaults(model);
+    }
+    setPrompt(p.text);
+    setNegativePrompt(p.negative ?? '');
     setCurrentScreen('create');
-    resetJob();
-    setTimeout(
-      () =>
-        startGeneration({
-          mediaType: type,
-          imageToVideo: false,
-          modelId: model.id,
-          prompt: promptText,
-          negativePrompt: '',
-          aspectRatio: d.aspectRatio,
-          duration: d.duration,
-          resolution: d.resolution,
-          seed: '',
-          audioStyle: d.audioStyle,
-          extraSettings: d.extras,
-          startFrame: null,
-          endFrame: null,
-          referenceIds: [],
-        }),
-      50
-    );
+    addToast('Prompt added to Create', model ? `Ready for ${model.name}.` : undefined, 'success');
   };
 
   // ---------- References ----------
@@ -1046,16 +1045,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateModelCreditCost,
         toggleModelStatus,
         updateModel,
-        chatOpen,
-        setChatOpen,
         chatModels,
         updateChatModel,
         toggleChatModelStatus,
+        chatConversations,
+        activeChatId,
         chatMessages,
         chatTyping,
+        newChat,
+        selectChat,
+        deleteChat,
+        renameChat,
         sendChatMessage,
-        clearChat,
-        quickGenerate,
+        sendPromptToCreate,
         mediaType,
         setMediaType,
         imageToVideo,
@@ -1123,10 +1125,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         apiKeys,
         createApiKey,
         revokeApiKey,
-        authModalOpen,
-        setAuthModalOpen,
-        authMode,
-        setAuthMode,
         buyCreditsModalOpen,
         setBuyCreditsModalOpen,
         saveToProjectModalOpen,
