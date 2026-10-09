@@ -1,5 +1,6 @@
 import {
   ModelApiKey,
+  ChatModel,
   AIModel,
   GenerationItem,
   Project,
@@ -67,6 +68,7 @@ export const AI_MODELS: AIModel[] = [
     rating: 4.9,
     featured: true,
     status: 'Active',
+    providerCost: 0.65,
     supports: ['Text-to-Video', 'Image-to-Video', 'Start/End Frame'],
     capabilities: {
       durations: ['5s', '10s', '15s', '30s'],
@@ -93,6 +95,7 @@ export const AI_MODELS: AIModel[] = [
     rating: 4.8,
     featured: true,
     status: 'Active',
+    providerCost: 0.55,
     supports: ['Text-to-Video', 'Image-to-Video', 'Multi-Reference'],
     capabilities: {
       durations: ['5s', '10s', '15s'],
@@ -119,6 +122,7 @@ export const AI_MODELS: AIModel[] = [
     rating: 4.7,
     featured: true,
     status: 'Active',
+    providerCost: 0.3,
     supports: ['Text-to-Video', 'Image-to-Video', 'Start/End Frame'],
     capabilities: {
       durations: ['5s', '10s'],
@@ -144,6 +148,7 @@ export const AI_MODELS: AIModel[] = [
     icon: '🌙',
     rating: 4.6,
     status: 'Beta',
+    providerCost: 0.8,
     supports: ['Text-to-Video', 'Image-to-Video'],
     capabilities: {
       durations: ['5s', '10s'],
@@ -169,6 +174,7 @@ export const AI_MODELS: AIModel[] = [
     rating: 4.9,
     featured: true,
     status: 'Active',
+    providerCost: 0.22,
     supports: ['Text-to-Image', 'Image Editing', 'Multi-Reference'],
     capabilities: {
       resolutions: ['1K', '2K', '4K'],
@@ -191,6 +197,7 @@ export const AI_MODELS: AIModel[] = [
     icon: '🎨',
     rating: 4.8,
     status: 'Active',
+    providerCost: 0.35,
     supports: ['Text-to-Image'],
     capabilities: {
       resolutions: ['1K', '2K'],
@@ -213,6 +220,7 @@ export const AI_MODELS: AIModel[] = [
     rating: 4.85,
     featured: true,
     status: 'Active',
+    providerCost: 0.5,
     supports: ['Text-to-Music', 'Reference Audio'],
     capabilities: {
       durations: ['15s', '30s', '60s', '120s'],
@@ -236,6 +244,7 @@ export const AI_MODELS: AIModel[] = [
     icon: '🔊',
     rating: 4.5,
     status: 'Active',
+    providerCost: 0.12,
     supports: ['Text-to-Audio', 'Sound Effects'],
     capabilities: {
       durations: ['10s', '30s', '47s'],
@@ -247,6 +256,13 @@ export const AI_MODELS: AIModel[] = [
     },
     costFactors: { duration: { '10s': 1, '30s': 2, '47s': 3 } },
   },
+];
+
+// ---------- Chat models (charged per message) ----------
+export const CHAT_MODELS: ChatModel[] = [
+  { id: 'chat-fast', name: 'Gemini 3 Flash', provider: 'Google DeepMind', icon: '⚡', description: 'Quick answers and prompt ideas.', creditCost: 2, providerCost: 0.004, status: 'Active', supports: ['Quick answers', 'Prompt ideas'] },
+  { id: 'chat-balanced', name: 'GPT-5 mini', provider: 'OpenAI', icon: '💬', description: 'Everyday writing, planning and questions.', creditCost: 5, providerCost: 0.011, status: 'Active', supports: ['Writing', 'Planning', 'Questions'] },
+  { id: 'chat-pro', name: 'Claude Sonnet 5.5', provider: 'Anthropic', icon: '🧠', description: 'Longer, more careful answers and detailed plans.', creditCost: 8, providerCost: 0.02, status: 'Active', supports: ['Long answers', 'Analysis', 'Detailed plans'] },
 ];
 
 export const getModel = (id: string): AIModel => AI_MODELS.find((m) => m.id === id) ?? AI_MODELS[0];
@@ -714,6 +730,9 @@ export const INITIAL_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
 // ---------- Admin: one API key per model ----------
 const demoKey = (id: string, tail: string) => `sk-${id}-demo-${tail}`;
 export const INITIAL_MODEL_KEYS: Record<string, ModelApiKey> = {
+  'chat-fast': { apiKey: demoKey('gemini', 'm2c91zra'), updatedAt: 'Oct 2, 2026' },
+  'chat-balanced': { apiKey: demoKey('gpt', 'w5d70kle'), updatedAt: 'Oct 2, 2026' },
+  'chat-pro': { apiKey: demoKey('claude', 'h3n48qvu'), updatedAt: 'Oct 2, 2026' },
   'kling-4': { apiKey: demoKey('kling', '7f3k29x0'), updatedAt: 'Oct 1, 2026' },
   'seedance-2-5': { apiKey: demoKey('seedance', 'q1m8c5ab'), updatedAt: 'Sep 24, 2026' },
   'wan-3': { apiKey: demoKey('wan', 'b72nd04e'), updatedAt: 'Sep 24, 2026' },

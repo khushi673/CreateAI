@@ -147,17 +147,6 @@ export const MONTHLY_SERIES = [
 
 export const BASE_TOTALS = { revenue: 36200, cost: 18900, creditsSold: 410000, creditsUsed: 362000 };
 
-export const MODEL_COST_SHARE: { modelId: string; cost: number }[] = [
-  { modelId: 'kling-4', cost: 5900 },
-  { modelId: 'seedance-2-5', cost: 4300 },
-  { modelId: 'wan-3', cost: 3100 },
-  { modelId: 'luma-ray-3', cost: 2600 },
-  { modelId: 'flux-2-pro', cost: 1400 },
-  { modelId: 'nano-banana', cost: 900 },
-  { modelId: 'suno-5', cost: 500 },
-  { modelId: 'stable-audio-3', cost: 200 },
-];
-
 /** Packs sold in the selected period (by credit pack id) */
 export const PACK_UNITS_SOLD: Record<string, number> = {
   pkg_starter: 410,
@@ -166,21 +155,6 @@ export const PACK_UNITS_SOLD: Record<string, number> = {
   pkg_production: 64,
 };
 
-/** What the AI provider charges for one base generation, in USD */
-export const PROVIDER_COST_PER_GENERATION: Record<string, number> = {
-  'kling-4': 0.65,
-  'seedance-2-5': 0.55,
-  'wan-3': 0.3,
-  'luma-ray-3': 0.8,
-  'nano-banana': 0.22,
-  'flux-2-pro': 0.35,
-  'suno-5': 0.5,
-  'stable-audio-3': 0.12,
-};
-
-
-
-
 // ---------- Announcements ----------
 
 export interface SentAnnouncement {
@@ -188,11 +162,13 @@ export interface SentAnnouncement {
   subject: string;
   body: string;
   recipients: number;
+  /** Also sent as an email, not only as a dashboard notification */
+  emailed: boolean;
   date: string;
 }
 
 export const INITIAL_SENT: SentAnnouncement[] = [
-  { id: 'sa_1', subject: 'Kling 4.0 is now live', body: 'Cinematic motion with start and end frame control is available on all paid plans.', recipients: 6, date: 'Oct 1, 2026' },
+  { id: 'sa_1', subject: 'Kling 4.0 is now live', body: 'Cinematic motion with start and end frame control is available on all paid plans.', recipients: 6, emailed: true, date: 'Oct 1, 2026' },
 ];
 
 // ---------- Dashboard ----------
@@ -214,3 +190,10 @@ export const MODEL_USAGE: { modelId: string; count: number }[] = [
   { modelId: 'suno-5', count: 142 },
   { modelId: 'flux-2-pro', count: 73 },
 ];
+
+/** Chat messages sent in the selected period, by chat model id (used to weight provider cost) */
+export const CHAT_USAGE: Record<string, number> = {
+  'chat-fast': 2400,
+  'chat-balanced': 1500,
+  'chat-pro': 600,
+};

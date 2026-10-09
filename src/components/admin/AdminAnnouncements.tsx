@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Search, Send, Loader2, CheckCircle2, Mail } from 'lucide-react';
-import { PageHeader, Card, Modal, Field, inputCls, btnPrimary, btnGhost, Avatar } from './ui';
+import { PageHeader, Card, Modal, Field, Toggle, inputCls, btnPrimary, btnGhost, Avatar } from './ui';
 import { INITIAL_SENT, SentAnnouncement } from '@/data/adminMock';
 
 export const AdminAnnouncements: React.FC = () => {
@@ -12,15 +12,18 @@ export const AdminAnnouncements: React.FC = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [byEmail, setByEmail] = useState(true);
   const [errors, setErrors] = useState<{ subject?: string; message?: string; recipients?: string }>({});
   const [confirm, setConfirm] = useState(false);
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [lastChannels, setLastChannels] = useState('');
   const [history, setHistory] = useState<SentAnnouncement[]>(INITIAL_SENT);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
+  const selectedUsers = adminUsers.filter((u) => selected.includes(u.id));
   const visible = adminUsers.filter((u) => (u.name + u.email).toLowerCase().includes(q.toLowerCase()));
   const allSelected = adminUsers.length > 0 && selected.length === adminUsers.length;
 
@@ -43,11 +46,12 @@ export const AdminAnnouncements: React.FC = () => {
     setSending(true);
     timer.current = setTimeout(() => {
       const count = selected.length;
-      publishAnnouncement(subject.trim(), message.trim(), count);
-      setHistory((h) => [{ id: 'sa_' + Date.now(), subject: subject.trim(), body: message.trim(), recipients: count, date: 'Just now' }, ...h]);
+      publishAnnouncement(subject.trim(), message.trim(), count, byEmail);
+      setHistory((h) => [{ id: 'sa_' + Date.now(), subject: subject.trim(), body: message.trim(), recipients: count, emailed: byEmail, date: 'Just now' }, ...h]);
       setSending(false);
       setConfirm(false);
       setSuccess(true);
+      setLastChannels(byEmail ? `Dashboard and email, ${count} user${count === 1 ? '' : 's'}` : `Dashboard, ${count} user${count === 1 ? '' : 's'}`);
       setSubject('');
       setMessage('');
       setSelected([]);
@@ -60,7 +64,7 @@ export const AdminAnnouncements: React.FC = () => {
 
       {success && (
         <div role="status" className="flex items-center gap-2 bg-emerald-950/50 border border-emerald-700/60 text-emerald-200 rounded-xl px-4 py-3 text-sm font-bold">
-          <CheckCircle2 className="w-4 h-4" /> Announcement sent successfully
+          <CheckCircle2 className="w-4 h-4" /> Announcement sent successfully<span className="font-normal text-emerald-300/80">· {lastChannels}</span>
         </div>
       )}
 
@@ -97,21 +101,35 @@ export const AdminAnnouncements: React.FC = () => {
             <div className="space-y-3">
               <Field label="Subject" hint="Shown as the title of the announcement." error={errors.subject}><input className={inputCls} value={subject} onChange={(e) => { setSubject(e.target.value); setErrors((x) => ({ ...x, subject: undefined })); setSuccess(false); }} placeholder="What's new on AetherGen" /></Field>
               <Field label="Message" hint="Recipients see this on their dashboard." error={errors.message}><textarea rows={5} className={inputCls} value={message} onChange={(e) => { setMessage(e.target.value); setErrors((x) => ({ ...x, message: undefined })); setSuccess(false); }} placeholder="Write your announcement..." /></Field>
-              <div className="flex justify-end">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <label className="flex items-center gap-2.5 text-xs text-zinc-300">
+                  <Toggle on={byEmail} onChange={setByEmail} label="Also send by email" />
+                  Also send by email
+                  <span className="text-zinc-600">(always shown on the user dashboard)</span>
+                </label>
                 <button className={btnPrimary} onClick={() => validate() && setConfirm(true)}><Send className="w-3.5 h-3.5" />Send announcement</button>
               </div>
             </div>
           </Card>
 
-          <Card title="3. Preview">
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 border-b border-zinc-800 text-[11px] text-zinc-400">
-                <Mail className="w-3.5 h-3.5" /> From: AetherGen &lt;no-reply@aethergen.ai&gt;
-                <span className="ml-auto">To: {selected.length} recipient{selected.length === 1 ? '' : 's'}</span>
-              </div>
-              <div className="p-4 space-y-2">
-                <h4 className="text-base font-black text-white">{subject || 'Your subject appears here'}</h4>
-                <p className="text-sm text-zinc-300 whitespace-pre-wrap">{message || 'Your message body appears here.'}</p>
+          <Card title="3. Preview" subtitle={byEmail ? 'How it looks as an email and on the dashboard.' : 'How it looks on the dashboard.'}>
+            <div className="space-y-3">
+              {byEmail && (
+                <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
+                  <div className="px-4 py-2.5 bg-zinc-900 border-b border-zinc-800 text-[11px] text-zinc-400 space-y-0.5">
+                    <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5" /> From: AetherGen &lt;no-reply@aethergen.ai&gt;</div>
+                    <div className="truncate pl-5">To: {selectedUsers.length ? selectedUsers.slice(0, 2).map((u) => u.email).join(', ') + (selectedUsers.length > 2 ? ` and ${selectedUsers.length - 2} more` : '') : 'No recipients selected'}</div>
+                    <div className="truncate pl-5">Subject: {subject || 'Your subject appears here'}</div>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-sm text-zinc-300 whitespace-pre-wrap">{message || 'Your message body appears here.'}</p>
+                  </div>
+                </div>
+              )}
+              <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Dashboard notification</span>
+                <h4 className="text-sm font-black text-white mt-1">{subject || 'Your subject appears here'}</h4>
+                <p className="text-xs text-zinc-400 whitespace-pre-wrap mt-0.5">{message || 'Your message body appears here.'}</p>
               </div>
             </div>
           </Card>
@@ -129,7 +147,7 @@ export const AdminAnnouncements: React.FC = () => {
                   <div className="text-sm font-bold text-white truncate">{h.subject}</div>
                   <div className="text-xs text-zinc-500 truncate">{h.body}</div>
                 </div>
-                <div className="text-[11px] text-zinc-400 whitespace-nowrap">{h.recipients} recipient{h.recipients === 1 ? '' : 's'} · {h.date}</div>
+                <div className="text-[11px] text-zinc-400 whitespace-nowrap">{h.recipients} recipient{h.recipients === 1 ? '' : 's'} · {h.emailed ? 'Dashboard + email' : 'Dashboard'} · {h.date}</div>
               </li>
             ))}
           </ul>
@@ -150,7 +168,7 @@ export const AdminAnnouncements: React.FC = () => {
           }
         >
           <p className="text-sm text-zinc-300">
-            &ldquo;<b>{subject}</b>&rdquo; will be sent to <b>{selected.length}</b> user{selected.length === 1 ? '' : 's'}. This cannot be undone.
+            &ldquo;<b>{subject}</b>&rdquo; will be sent to <b>{selected.length}</b> user{selected.length === 1 ? '' : 's'} on their dashboard{byEmail ? ' and by email' : ''}. This cannot be undone.
           </p>
         </Modal>
       )}

@@ -7,13 +7,14 @@ import { SAMPLE_IMAGES, SAMPLE_VIDEOS } from '@/data/mockData';
 import { chip, DemoBadge, ghostBtn, inputCls, PageHeader, primaryBtn } from '@/components/labs/ui';
 import { ModalShell } from '@/components/common/ModalShell';
 import { copyText } from '@/lib/clipboard';
+import { ShareWith, Switch, EMAIL_RE, type Recipient } from '@/components/collaboration/EmailNotify';
 
 type Tab = 'team' | 'project' | 'generation' | 'gallery';
 type Access = 'Private' | 'Team' | 'Anyone with link';
 const ROLES = ['Owner', 'Admin', 'Editor', 'Viewer'];
 const ACCESS: Access[] = ['Private', 'Team', 'Anyone with link'];
 
-interface Member { id: string; name: string; email: string; avatar: string; role: string }
+interface Member { id: string; name: string; email: string; avatar: string; role: string; invited?: boolean; emailed?: boolean }
 
 const GALLERY = [
   { id: 'g1', creator: 'Nova Studio', likes: 1280, kind: 'Video', img: SAMPLE_VIDEOS[0].thumbnailUrl, prompt: 'Neon alley chase at night, handheld camera, rain, cinematic grade' },
@@ -28,6 +29,7 @@ const fakeLink = (kind: string, id: string) => `https://aethergen.app/${kind}/${
 
 export const CollaborationView: React.FC = () => {
   const { adminUsers, projects, generations, addToast, setPrompt, setCurrentScreen } = useApp();
+  const [emailDefault, setEmailDefault] = useState(true);
   const [tab, setTab] = useState<Tab>('team');
 
   // team
@@ -39,13 +41,20 @@ export const CollaborationView: React.FC = () => {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('Editor');
+  const [inviteNotify, setInviteNotify] = useState(true);
+  const [inviting, setInviting] = useState(false);
+  const openInvite = () => { setInviteNotify(emailDefault); setInviteOpen(true); };
 
   const invite = () => {
-    if (!/^\S+@\S+\.\S+$/.test(email)) return addToast('Enter a valid email', undefined, 'warning');
-    if (members.some((m) => m.email === email)) return addToast('Already a member', email, 'warning');
-    setMembers((p) => [...p, { id: 'inv_' + Date.now(), name: email.split('@')[0], email, avatar: `https://i.pravatar.cc/150?u=${encodeURIComponent(email)}`, role: inviteRole }]);
-    addToast('Invitation sent', `${email} was added as ${inviteRole}.`, 'success');
-    setEmail(''); setInviteOpen(false);
+    const to = email.trim();
+    if (!EMAIL_RE.test(to)) return addToast('Enter a valid email', undefined, 'warning');
+    if (members.some((m) => m.email === to)) return addToast('Already a member', to, 'warning');
+    setInviting(true);
+    setTimeout(() => {
+      setMembers((p) => [...p, { id: 'inv_' + Date.now(), name: to.split('@')[0], email: to, avatar: `https://i.pravatar.cc/150?u=${encodeURIComponent(to)}`, role: inviteRole, invited: true, emailed: inviteNotify }]);
+      addToast('Invite sent', inviteNotify ? `In-app notification and email sent to ${to}.` : `In-app notification sent to ${to}.`, 'success');
+      setEmail(''); setInviting(false); setInviteOpen(false);
+    }, 1000);
   };
 
   // share project / generation
@@ -55,6 +64,8 @@ export const CollaborationView: React.FC = () => {
   const proj = projects.find((p) => p.id === projId);
   const gen = generations.find((g) => g.id === genId);
   const access = projAccess[projId] ?? 'Private';
+  const [projShared, setProjShared] = useState<Record<string, Recipient[]>>({});
+  const [genShared, setGenShared] = useState<Record<string, Recipient[]>>({});
   const copy = async (link: string) => { await copyText(link); addToast('Link copied', link, 'success'); };
 
   // gallery
@@ -78,7 +89,7 @@ export const CollaborationView: React.FC = () => {
         subtitle="Share projects and see community work. Pick a tab below."
       />
       <div className="flex items-start gap-2 text-[11px] text-zinc-400 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-2">
-        <Info className="w-3.5 h-3.5 mt-0.5 text-fuchsia-400 shrink-0" />Demo only: invites and share links are not sent to anyone.
+        <Info className="w-3.5 h-3.5 mt-0.5 text-fuchsia-400 shrink-0" />Invites, links and emails are simulated and do not reach anyone.
       </div>
 
       <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -89,9 +100,13 @@ export const CollaborationView: React.FC = () => {
 
       {tab === 'team' && (
         <div className={`${card} space-y-4`}>
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-950/50 px-3 py-2.5">
+            <div><div className="text-xs font-bold text-white">Email notifications</div><p className="text-[11px] text-zinc-500">Send an email as well as an in-app notification when you invite or share.</p></div>
+            <Switch checked={emailDefault} onChange={setEmailDefault} label="Email notifications" />
+          </div>
           <div className="flex items-center justify-between">
             <div><h2 className="text-sm font-extrabold text-white">Members</h2><p className="text-[11px] text-zinc-500">{members.length} people in this workspace</p></div>
-            <button onClick={() => setInviteOpen(true)} className={primaryBtn}><UserPlus className="w-3.5 h-3.5" />Invite member</button>
+            <button onClick={openInvite} className={primaryBtn}><UserPlus className="w-3.5 h-3.5" />Invite member</button>
           </div>
           {members.length === 0 && <p className="text-xs text-zinc-500 py-6 text-center">No members yet. Click Invite member to add the first one.</p>}
           <div className="divide-y divide-zinc-800/80">
@@ -99,7 +114,7 @@ export const CollaborationView: React.FC = () => {
               <div key={m.id} className="flex items-center gap-3 py-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={m.avatar} alt="" className="w-9 h-9 rounded-full object-cover border border-zinc-700" />
-                <div className="flex-1 min-w-0"><div className="text-xs font-bold text-white truncate">{m.name}</div><div className="text-[11px] text-zinc-500 truncate">{m.email}</div></div>
+                <div className="flex-1 min-w-0"><div className="text-xs font-bold text-white truncate">{m.name}</div><div className="text-[11px] text-zinc-500 truncate">{m.email}</div>{m.invited && <div className="text-[10px] text-fuchsia-300">{m.emailed ? 'Invited · email sent' : 'Invited'}</div>}</div>
                 <select
                   value={m.role}
                   disabled={m.role === 'Owner'}
@@ -146,6 +161,9 @@ export const CollaborationView: React.FC = () => {
                   {access === 'Private' ? <p className="text-[11px] text-zinc-500">Only you can open this project. Choose Team or Anyone with link to get a share link.</p> : (
                     <div className="flex gap-2"><input readOnly value={fakeLink('p', proj.id)} className={inputCls} /><button onClick={() => copy(fakeLink('p', proj.id))} className={ghostBtn}><Copy className="w-3.5 h-3.5" />Copy</button></div>
                   )}
+                  <div className="pt-3 border-t border-zinc-800">
+                    <ShareWith key={proj.id} defaultNotify={emailDefault} toast={addToast} recipients={projShared[proj.id] ?? []} onShared={(r) => setProjShared((p) => ({ ...p, [proj.id]: [...(p[proj.id] ?? []), r] }))} />
+                  </div>
                 </div>
               )}
             </>
@@ -170,6 +188,9 @@ export const CollaborationView: React.FC = () => {
                 <div className="space-y-2 pt-3 border-t border-zinc-800">
                   <div className="text-xs font-bold text-white truncate">{gen.title}</div>
                   <div className="flex gap-2"><input readOnly value={fakeLink('g', gen.id)} className={inputCls} /><button onClick={() => copy(fakeLink('g', gen.id))} className={ghostBtn}><Link2 className="w-3.5 h-3.5" />Copy link</button></div>
+                  <div className="pt-3">
+                    <ShareWith key={gen.id} defaultNotify={emailDefault} toast={addToast} recipients={genShared[gen.id] ?? []} onShared={(r) => setGenShared((p) => ({ ...p, [gen.id]: [...(p[gen.id] ?? []), r] }))} />
+                  </div>
                 </div>
               )}
             </>
@@ -219,7 +240,7 @@ export const CollaborationView: React.FC = () => {
         <div className="space-y-3">
           <div className="relative"><Mail className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" /><input autoFocus type="email" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && invite()} placeholder="name@company.com" className={`${inputCls} !pl-9`} /></div>
           <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className={inputCls}>{ROLES.slice(1).map((r) => <option key={r}>{r}</option>)}</select>
-          <button onClick={invite} className={`${primaryBtn} w-full`}>Send invite</button>
+          <button onClick={invite} disabled={inviting} className={`${primaryBtn} w-full`}>{inviting ? 'Sending…' : 'Send invite'}</button>
         </div>
       </ModalShell>
       )}

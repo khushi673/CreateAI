@@ -17,14 +17,12 @@ import { LandingView } from '@/components/views/LandingView';
 import { DashboardView } from '@/components/views/DashboardView';
 import { CreateView } from '@/components/views/CreateView';
 import { ResultView } from '@/components/views/ResultView';
+import { ChatPanel } from '@/components/chat/ChatPanel';
 import { CompareView } from '@/components/views/CompareView';
 import { ReferenceLibraryView } from '@/components/views/ReferenceLibraryView';
 import { HistoryView } from '@/components/views/HistoryView';
 import { ProjectsView } from '@/components/views/ProjectsView';
 import { ProjectDetailView } from '@/components/views/ProjectDetailView';
-import { PromptBuilderView } from '@/components/views/PromptBuilderView';
-import { StoryboardView } from '@/components/views/StoryboardView';
-import { ToolsView } from '@/components/views/ToolsView';
 import { CollaborationView } from '@/components/views/CollaborationView';
 import { CreditsView } from '@/components/views/CreditsView';
 import { ProfileView } from '@/components/views/ProfileView';
@@ -74,9 +72,6 @@ function AppContent() {
             {currentScreen === 'history' && <HistoryView />}
             {currentScreen === 'projects' && <ProjectsView />}
             {currentScreen === 'project-detail' && <ProjectDetailView />}
-            {currentScreen === 'prompt-builder' && <PromptBuilderView />}
-            {currentScreen === 'storyboard' && <StoryboardView />}
-            {currentScreen === 'tools' && <ToolsView />}
             {currentScreen === 'collaboration' && <CollaborationView />}
             {currentScreen === 'credits' && <CreditsView />}
             {currentScreen === 'profile' && <ProfileView />}
@@ -84,6 +79,7 @@ function AppContent() {
         </div>
       )}
 
+      <ChatPanel />
       <AuthModal />
       <BuyCreditsModal />
       <SaveToProjectModal />

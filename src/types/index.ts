@@ -9,9 +9,6 @@ export type ViewScreen =
   | 'history'
   | 'projects'
   | 'project-detail'
-  | 'prompt-builder'
-  | 'storyboard'
-  | 'tools'
   | 'collaboration'
   | 'credits'
   | 'profile'
@@ -52,6 +49,8 @@ export interface AIModel {
   rating: number;
   featured?: boolean;
   status: ModelStatus;
+  /** What the AI provider charges (USD) for one base generation */
+  providerCost: number;
   supports: string[];
   capabilities: ModelCapabilities;
   costFactors: { duration?: Record<string, number>; resolution?: Record<string, number> };
@@ -250,4 +249,36 @@ export interface ApiKeyItem {
 export interface ModelApiKey {
   apiKey: string;
   updatedAt: string;
+}
+
+// ---------- Chat ----------
+
+/** Text assistant model. Charged per message. */
+export interface ChatModel {
+  id: string;
+  name: string;
+  provider: string;
+  icon: string;
+  description: string;
+  /** Credits charged per message */
+  creditCost: number;
+  /** What the AI provider charges (USD) per message */
+  providerCost: number;
+  status: ModelStatus;
+  supports: string[];
+}
+
+export type ChatAction =
+  | { kind: 'open'; label: string; screen: ViewScreen }
+  | { kind: 'generate'; label: string; mediaType: MediaType; prompt: string }
+  | { kind: 'create'; label: string; mediaType: MediaType; prompt: string };
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  /** Credits charged for this exchange (on the user message) */
+  cost?: number;
+  modelName?: string;
+  actions?: ChatAction[];
 }

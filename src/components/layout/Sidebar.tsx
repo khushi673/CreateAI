@@ -12,9 +12,6 @@ import {
   Settings,
   Columns3,
   Library,
-  LayoutTemplate,
-  Clapperboard,
-  Hammer,
   Users,
   X,
 } from 'lucide-react';
@@ -38,15 +35,6 @@ const GROUPS: { title: string; hint?: string; items: NavItem[] }[] = [
       { id: 'history', label: 'History', icon: History },
       { id: 'projects', label: 'Projects', icon: FolderKanban },
       { id: 'references', label: 'References', icon: Library },
-    ],
-  },
-  {
-    title: 'Tools',
-    hint: 'Optional helpers',
-    items: [
-      { id: 'prompt-builder', label: 'Prompt Builder', icon: LayoutTemplate },
-      { id: 'storyboard', label: 'Storyboard', icon: Clapperboard },
-      { id: 'tools', label: 'Post tools', icon: Hammer },
       { id: 'collaboration', label: 'Collaboration', icon: Users },
     ],
   },

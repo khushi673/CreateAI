@@ -24,6 +24,8 @@ import {
   GenerateParams,
   GenerateTarget,
   ModelApiKey,
+  ChatModel,
+  ChatMessage,
 } from '@/types';
 import {
   AI_MODELS,
@@ -42,7 +44,9 @@ import {
   AUDIO_COVER,
   getModel,
   INITIAL_MODEL_KEYS,
+  CHAT_MODELS,
 } from '@/data/mockData';
+import { chatReply } from '@/lib/chatAssistant';
 import { estimateCost } from '@/lib/pricing';
 
 interface AppContextType {
@@ -69,6 +73,20 @@ interface AppContextType {
   updateModelCreditCost: (modelId: string, newCost: number) => void;
   toggleModelStatus: (modelId: string) => void;
   updateModel: (modelId: string, patch: Partial<AIModel>) => void;
+
+  // Chat assistant
+  chatOpen: boolean;
+  setChatOpen: (open: boolean) => void;
+  chatModels: ChatModel[];
+  updateChatModel: (modelId: string, patch: Partial<ChatModel>) => void;
+  toggleChatModelStatus: (modelId: string) => void;
+  chatMessages: ChatMessage[];
+  chatTyping: boolean;
+  /** Charges the model's per-message cost, then adds the simulated reply */
+  sendChatMessage: (text: string, modelId: string) => void;
+  clearChat: () => void;
+  /** Sets up Create with a prompt on the best active model and starts generating */
+  quickGenerate: (mediaType: MediaType, prompt: string) => void;
 
   // Studio form
   mediaType: MediaType;
@@ -150,7 +168,7 @@ interface AppContextType {
 
   // News / announcements
   newsItems: NewsItem[];
-  publishAnnouncement: (title: string, body: string, recipientCount: number) => void;
+  publishAnnouncement: (title: string, body: string, recipientCount: number, byEmail?: boolean) => void;
 
   // Developer API keys (mock)
   apiKeys: ApiKeyItem[];
@@ -230,6 +248,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(INITIAL_PROJECTS[0].id);
   const [generateTarget, setGenerateTarget] = useState<GenerateTarget | null>(null);
+
+  // Chat
+  const [chatModels, setChatModels] = useState<ChatModel[]>(CHAT_MODELS);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatTyping, setChatTyping] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Models
   const [models, setModels] = useState<AIModel[]>(AI_MODELS);
@@ -410,6 +434,94 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const next = m.status === 'Disabled' ? 'Active' : 'Disabled';
     updateModel(modelId, { status: next });
     addToast(`${m.name} ${next === 'Active' ? 'enabled' : 'disabled'}`, next === 'Active' ? 'Users can select it in Create.' : 'Hidden from Create.', next === 'Active' ? 'success' : 'warning');
+  };
+
+  // ---------- Chat ----------
+  const updateChatModel = (modelId: string, patch: Partial<ChatModel>) =>
+    setChatModels((prev) => prev.map((m) => (m.id === modelId ? { ...m, ...patch } : m)));
+
+  const toggleChatModelStatus = (modelId: string) => {
+    const m = chatModels.find((x) => x.id === modelId);
+    if (!m) return;
+    const next = m.status === 'Disabled' ? 'Active' : 'Disabled';
+    updateChatModel(modelId, { status: next });
+    addToast(`${m.name} ${next === 'Active' ? 'enabled' : 'disabled'}`, next === 'Active' ? 'Users can select it in Chat.' : 'Hidden from Chat.', next === 'Active' ? 'success' : 'warning');
+  };
+
+  const clearChat = () => setChatMessages([]);
+
+  const sendChatMessage = (text: string, modelId: string) => {
+    const model = chatModels.find((m) => m.id === modelId);
+    const msg = text.trim();
+    if (!model || !msg || chatTyping) return;
+    if (model.status === 'Disabled') {
+      addToast('Model unavailable', `${model.name} is disabled by an administrator.`, 'warning');
+      return;
+    }
+    if (user.credits < model.creditCost) {
+      addToast('Not enough credits', `${model.name} costs ${model.creditCost} credits per message. Add credits in Credits & plans.`, 'warning');
+      return;
+    }
+    setUser((prev) => ({ ...prev, credits: prev.credits - model.creditCost }));
+    setAdminUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, credits: Math.max(0, u.credits - model.creditCost) } : u)));
+    logTransaction({ kind: 'charge', title: `Chat — ${model.name}`, detail: '1 message', amount: -model.creditCost });
+    setChatMessages((prev) => [...prev, { id: 'msg_' + Date.now(), role: 'user', text: msg, cost: model.creditCost, modelName: model.name }]);
+    setChatTyping(true);
+
+    const cheapest = (type: MediaType) => {
+      const m = models.filter((x) => x.mediaTypes.includes(type) && x.status === 'Active').sort((a, b) => a.creditCost - b.creditCost)[0];
+      if (!m) return null;
+      const d = defaultsFor(m);
+      return { modelName: m.name, cost: estimateCost(m, m.capabilities.durations ? d.duration : undefined, m.capabilities.resolutions ? d.resolution : undefined) };
+    };
+    const reply = chatReply(msg, {
+      credits: user.credits - model.creditCost,
+      generationCount: generations.length,
+      projectNames: projects.map((p) => p.name),
+      estimate: cheapest,
+    });
+    setTimeout(() => {
+      setChatMessages((prev) => [...prev, { id: 'msg_' + Date.now() + 'a', role: 'assistant', text: reply.text, modelName: model.name, actions: reply.actions }]);
+      setChatTyping(false);
+    }, 1100);
+  };
+
+  const quickGenerate = (type: MediaType, promptText: string) => {
+    const model = models.filter((m) => m.mediaTypes.includes(type) && m.status === 'Active').sort((a, b) => a.creditCost - b.creditCost)[0];
+    if (!model) {
+      addToast('No model available', `No ${type} model is enabled right now.`, 'warning');
+      return;
+    }
+    const d = defaultsFor(model);
+    setMediaTypeState(type);
+    setImageToVideoState(false);
+    setSelectedModelState(model);
+    applyModelDefaults(model);
+    setPrompt(promptText);
+    setStartFrame(null);
+    setEndFrame(null);
+    setCurrentScreen('create');
+    resetJob();
+    setTimeout(
+      () =>
+        startGeneration({
+          mediaType: type,
+          imageToVideo: false,
+          modelId: model.id,
+          prompt: promptText,
+          negativePrompt: '',
+          aspectRatio: d.aspectRatio,
+          duration: d.duration,
+          resolution: d.resolution,
+          seed: '',
+          audioStyle: d.audioStyle,
+          extraSettings: d.extras,
+          startFrame: null,
+          endFrame: null,
+          referenceIds: [],
+        }),
+      50
+    );
   };
 
   // ---------- References ----------
@@ -828,7 +940,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // ---------- News ----------
-  const publishAnnouncement = (title: string, body: string, recipientCount: number) => {
+  const publishAnnouncement = (title: string, body: string, recipientCount: number, byEmail = false) => {
     const item: NewsItem = {
       id: 'news_' + Date.now(),
       tag: 'Announcement',
@@ -838,7 +950,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       image: SAMPLE_IMAGES[2],
     };
     setNewsItems((prev) => [item, ...prev]);
-    addToast('Announcement sent successfully', `Sent to ${recipientCount} user${recipientCount === 1 ? '' : 's'}.`, 'success');
+    addToast('Announcement sent successfully', `${byEmail ? 'Dashboard notification and email sent' : 'Dashboard notification sent'} to ${recipientCount} user${recipientCount === 1 ? '' : 's'}.`, 'success');
   };
 
   // ---------- API keys ----------
@@ -934,6 +1046,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateModelCreditCost,
         toggleModelStatus,
         updateModel,
+        chatOpen,
+        setChatOpen,
+        chatModels,
+        updateChatModel,
+        toggleChatModelStatus,
+        chatMessages,
+        chatTyping,
+        sendChatMessage,
+        clearChat,
+        quickGenerate,
         mediaType,
         setMediaType,
         imageToVideo,

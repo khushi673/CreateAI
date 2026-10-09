@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
 import { AIModel } from '@/types';
+import { ChevronDown, Check } from 'lucide-react';
 
 interface ModelSelectProps {
   models: AIModel[];
