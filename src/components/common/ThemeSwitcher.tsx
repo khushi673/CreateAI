@@ -5,10 +5,10 @@ import { Palette, Check, X } from 'lucide-react';
 
 /** Colour themes defined in globals.css (html[data-theme="..."]). '' = original purple. */
 const THEMES = [
-  { id: 'gennook', name: 'GenNook Teal & Amber', note: 'Matches the logo', colors: ['#071A1D', '#0B8089', '#F9B51B'] },
-  { id: 'ocean', name: 'Ocean Blue', note: 'Calm and modern', colors: ['#080D1C', '#3559F0', '#22D3EE'] },
-  { id: 'sunset', name: 'Sunset Coral', note: 'Warm and friendly', colors: ['#130E0C', '#EE4A36', '#FB910B'] },
-  { id: 'violet', name: 'Violet Glow', note: 'Polished version of today', colors: ['#0E0C1B', '#7C3AED', '#F7477F'] },
+  { id: 'gennook', name: 'GenNook Fresh', note: 'Light · matches the logo', colors: ['#F1F7F6', '#06515A', '#F9B51B'] },
+  { id: 'sunset', name: 'Cozy Sunset', note: 'Warm light · playful', colors: ['#FFF6EE', '#F04B37', '#FB910B'] },
+  { id: 'ocean', name: 'Ocean Glass', note: 'Dark · glowing glass', colors: ['#070C1A', '#3559F0', '#22D3EE'] },
+  { id: 'lavender', name: 'Lavender Cloud', note: 'Pastel light · dreamy', colors: ['#F4F0FF', '#8B6CF6', '#6EE4C3'] },
   { id: '', name: 'Original', note: 'Current prototype', colors: ['#09090B', '#9333EA', '#D946EF'] },
 ];
 

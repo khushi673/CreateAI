@@ -6,6 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ToastContainer } from '@/components/common/Toast';
+import { ThemeSwitcher } from '@/components/common/ThemeSwitcher';
 import { BuyCreditsModal } from '@/components/modals/BuyCreditsModal';
 import { SaveToProjectModal } from '@/components/modals/SaveToProjectModal';
 import { NewProjectModal } from '@/components/modals/NewProjectModal';
@@ -54,7 +55,7 @@ function AppContent() {
       <div className="flex-1 flex max-w-[1600px] w-full mx-auto">
         <Sidebar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+        <main className="app-main flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           {currentScreen === 'dashboard' && <DashboardView />}
           {currentScreen === 'create' && <CreateView />}
           {currentScreen === 'result' && <ResultView />}
@@ -74,6 +75,7 @@ function AppContent() {
       <SaveToProjectModal />
       <NewProjectModal />
       <ToastContainer />
+      <ThemeSwitcher />
     </div>
   );
 }

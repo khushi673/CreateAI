@@ -33,7 +33,7 @@ export const DashboardView: React.FC = () => {
   return (
     <div className="space-y-6 pb-16">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white">Welcome back, {user.name}</h1>
+        <h1 className="greeting text-2xl sm:text-3xl font-black text-white">Welcome back, {user.name}</h1>
         <p className="text-xs sm:text-sm text-zinc-400 mt-1">News, recent generations and your projects.</p>
       </div>
 

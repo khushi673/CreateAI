@@ -1,0 +1,321 @@
+/* ─── Colour themes ────────────────────────────────────────────────
+   Picked with the "Colour theme" button (ThemeSwitcher) or ?theme=<id>.
+   Every theme keeps the same screens and layout; it restyles the shell
+   (sidebar, top bar, background), cards, buttons, corners and fonts.
+   No data-theme on <html> = the original look. Admin is not affected. */
+
+/* Shared by all themes */
+html[data-theme] .app-shell {
+  position: relative;
+  isolation: isolate;
+  font-family: var(--theme-font);
+}
+html[data-theme] .app-shell::before {
+  content: '';
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--theme-blobs);
+  filter: blur(40px);
+  animation: themeDrift 24s ease-in-out infinite alternate;
+}
+html[data-theme] .app-shell :is(h1, h2, h3) { font-family: var(--theme-heading, var(--theme-font)); }
+html[data-theme] .app-shell .app-main { padding-top: 2rem; }
+html[data-theme] .app-shell .nav-item { font-size: 13px; padding-top: .6rem; padding-bottom: .6rem; transition: all .2s ease; }
+html[data-theme] .app-shell .nav-item:hover { transform: translateX(2px); }
+html[data-theme] .app-shell .nav-group { font-size: 11px; letter-spacing: .08em; }
+html[data-theme] .app-shell .greeting::after {
+  content: '👋';
+  display: inline-block;
+  margin-left: .35em;
+  transform-origin: 70% 70%;
+  animation: themeWave 2.8s ease-in-out infinite;
+}
+html[data-theme] .app-shell .bg-purple-600 {
+  background-image: var(--theme-button);
+  box-shadow: 0 8px 20px -8px var(--theme-glow);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+html[data-theme] .app-shell button.bg-purple-600:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 12px 26px -8px var(--theme-glow);
+}
+html[data-theme] .app-shell .brand-mark { background-image: var(--theme-button); box-shadow: 0 8px 20px -8px var(--theme-glow); }
+html[data-theme] .app-shell :is(article, .glass-card) { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+html[data-theme] .app-shell :is(article, .glass-card):hover { transform: translateY(-3px); }
+html[data-theme] .gradient-text { background-image: var(--theme-button); }
+
+@keyframes themeDrift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-3%, 2%, 0) scale(1.06); }
+}
+@keyframes themeWave {
+  0%, 60%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(16deg); }
+  20%, 40% { transform: rotate(-8deg); }
+}
+
+/* Light themes: soft white cards with gentle shadows instead of dark glass */
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) .app-shell {
+  color: var(--ink);
+}
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) .app-shell :is(.glass-panel, .glass-card) {
+  background: color-mix(in srgb, #fff 82%, transparent);
+  border-color: var(--color-zinc-800);
+}
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) .app-shell :is(.glass-panel, .glass-card, article, [class*="bg-zinc-900"]):not(button, input, textarea, select, span) {
+  box-shadow: var(--theme-card-shadow);
+}
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) .app-shell .app-navbar {
+  background: color-mix(in srgb, #fff 70%, transparent);
+  border-color: transparent;
+  box-shadow: 0 1px 0 var(--color-zinc-800);
+}
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) .app-shell :is(input, textarea, select) {
+  background-color: #fff;
+}
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) .app-shell .inset-0:is(.bg-black\/80, .bg-black\/75, .bg-black\/70) {
+  background-color: rgba(40, 30, 50, .35);
+}
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) ::-webkit-scrollbar-track { background: transparent; }
+html:is([data-theme="gennook"], [data-theme="sunset"], [data-theme="lavender"]) ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .15); }
+
+/* Floating sidebar panel (GenNook, Ocean, Lavender) */
+html:is([data-theme="gennook"], [data-theme="ocean"], [data-theme="lavender"]) .app-shell .app-sidebar {
+  margin: 1rem 0 1rem 1rem;
+  height: calc(100vh - 65px - 2rem);
+  top: calc(65px + 1rem);
+  border: none;
+  border-radius: 1.5rem;
+}
+
+/* ── 1. GenNook Fresh: logo teal + amber, light, solid teal sidebar ── */
+html[data-theme="gennook"] .app-shell {
+  --theme-font: var(--font-jakarta), sans-serif;
+  --theme-button: linear-gradient(135deg, #0B8089, #06515A);
+  --theme-glow: rgba(6, 81, 90, .45);
+  --theme-card-shadow: 0 1px 2px rgba(6, 81, 90, .05), 0 10px 28px -14px rgba(6, 81, 90, .22);
+  --theme-blobs:
+    radial-gradient(40% 35% at 8% 0%, rgba(11, 128, 137, .14), transparent 70%),
+    radial-gradient(35% 30% at 95% 5%, rgba(249, 181, 27, .16), transparent 70%),
+    radial-gradient(40% 40% at 70% 100%, rgba(11, 128, 137, .08), transparent 70%);
+  --radius-xl: .875rem; --radius-2xl: 1.25rem; --radius-3xl: 1.75rem;
+}
+html[data-theme="gennook"] .app-shell .app-sidebar {
+  background: linear-gradient(180deg, #06515A 0%, #043C42 100%);
+  box-shadow: 0 20px 40px -20px rgba(6, 81, 90, .6);
+}
+html[data-theme="gennook"] .app-shell .app-sidebar .nav-group { color: rgba(255, 255, 255, .5); }
+html[data-theme="gennook"] .app-shell .app-sidebar .nav-item { color: rgba(255, 255, 255, .78); border-color: transparent; }
+html[data-theme="gennook"] .app-shell .app-sidebar .nav-item:hover { color: #fff; background: rgba(255, 255, 255, .09); }
+html[data-theme="gennook"] .app-shell .app-sidebar .nav-icon { color: inherit; }
+html[data-theme="gennook"] .app-shell .app-sidebar [data-nav="credits"] .nav-icon { color: #F9B51B; }
+html[data-theme="gennook"] .app-shell .app-sidebar .nav-item[data-active] {
+  background: #F9B51B;
+  color: #06515A;
+  box-shadow: 0 8px 18px -8px rgba(249, 181, 27, .8);
+}
+html[data-theme="gennook"] .app-shell .app-sidebar .nav-item[data-active] .nav-icon { color: #06515A; }
+html[data-theme="gennook"] .app-shell .brand-mark { background-image: linear-gradient(135deg, #0B8089, #F9B51B); }
+
+/* ── 2. Cozy Sunset: warm cream, colourful icon chips, extra round, bouncy ── */
+html[data-theme="sunset"] .app-shell {
+  --theme-font: var(--font-nunito), sans-serif;
+  --theme-button: linear-gradient(135deg, #FF7A59, #F04B37 60%, #FB910B);
+  --theme-glow: rgba(240, 75, 55, .5);
+  --theme-card-shadow: 0 2px 4px rgba(160, 80, 40, .04), 0 14px 32px -16px rgba(180, 90, 40, .28);
+  --theme-blobs:
+    radial-gradient(38% 34% at 5% 0%, rgba(255, 140, 110, .22), transparent 70%),
+    radial-gradient(34% 30% at 100% 0%, rgba(255, 196, 77, .26), transparent 70%),
+    radial-gradient(40% 40% at 60% 100%, rgba(255, 170, 140, .14), transparent 70%);
+  --radius-lg: .75rem; --radius-xl: 1.125rem; --radius-2xl: 1.6rem; --radius-3xl: 2.1rem;
+}
+html[data-theme="sunset"] .app-shell :is(.glass-panel, .glass-card, article, [class*="bg-zinc-900"]):not(button, input, textarea, select, span) { border-color: transparent; }
+html[data-theme="sunset"] .app-shell .bg-purple-600 { border-radius: 9999px; }
+html[data-theme="sunset"] .app-shell button.bg-purple-600:hover:not(:disabled) { transform: translateY(-2px) scale(1.03); }
+html[data-theme="sunset"] .app-shell .app-sidebar { background: transparent; border-color: transparent; }
+html[data-theme="sunset"] .app-shell .nav-item { border-color: transparent; color: var(--color-zinc-300); font-weight: 700; }
+html[data-theme="sunset"] .app-shell .nav-item:hover { background: #fff; box-shadow: var(--theme-card-shadow); }
+html[data-theme="sunset"] .app-shell .nav-icon {
+  box-sizing: content-box;
+  padding: 6px;
+  border-radius: 10px;
+  color: var(--chip-fg);
+  background: var(--chip-bg);
+}
+html[data-theme="sunset"] .app-shell [data-nav="dashboard"] { --chip-bg: #FFE4D6; --chip-fg: #E8572E; }
+html[data-theme="sunset"] .app-shell [data-nav="create"] { --chip-bg: #FFE0EA; --chip-fg: #D9396A; }
+html[data-theme="sunset"] .app-shell [data-nav="chat"] { --chip-bg: #E2F0FF; --chip-fg: #2F76D2; }
+html[data-theme="sunset"] .app-shell [data-nav="compare"] { --chip-bg: #EDE5FF; --chip-fg: #7A4FD8; }
+html[data-theme="sunset"] .app-shell [data-nav="history"] { --chip-bg: #FFF1CC; --chip-fg: #C98A00; }
+html[data-theme="sunset"] .app-shell [data-nav="projects"] { --chip-bg: #DDF6EA; --chip-fg: #1E9C66; }
+html[data-theme="sunset"] .app-shell [data-nav="references"] { --chip-bg: #FFE6F6; --chip-fg: #C2409A; }
+html[data-theme="sunset"] .app-shell [data-nav="collaboration"] { --chip-bg: #DDF3F8; --chip-fg: #1F8CA8; }
+html[data-theme="sunset"] .app-shell [data-nav="credits"] { --chip-bg: #FFF0C2; --chip-fg: #D08A00; }
+html[data-theme="sunset"] .app-shell [data-nav="profile"] { --chip-bg: #EFE8E2; --chip-fg: #7A5F50; }
+html[data-theme="sunset"] .app-shell .nav-item[data-active] {
+  background-image: var(--theme-button);
+  color: #fff;
+  box-shadow: 0 10px 22px -10px var(--theme-glow);
+}
+html[data-theme="sunset"] .app-shell .nav-item[data-active] .nav-icon { background: rgba(255, 255, 255, .25); color: #fff; }
+
+/* ── 3. Ocean Glass: dark navy, glowing aurora, frosted glass ── */
+html[data-theme="ocean"] .app-shell {
+  --theme-font: var(--font-outfit), sans-serif;
+  --theme-button: linear-gradient(135deg, #4F78FF, #2846CC 55%, #06B6D4);
+  --theme-glow: rgba(34, 211, 238, .45);
+  --theme-blobs:
+    radial-gradient(38% 38% at 10% 5%, rgba(53, 89, 240, .6), transparent 70%),
+    radial-gradient(32% 32% at 92% 12%, rgba(34, 211, 238, .42), transparent 70%),
+    radial-gradient(40% 40% at 55% 100%, rgba(139, 92, 246, .4), transparent 70%);
+  --radius-xl: .875rem; --radius-2xl: 1.25rem; --radius-3xl: 1.6rem;
+}
+html[data-theme="ocean"] .app-shell :is(.glass-panel, .glass-card, article, [class*="bg-zinc-900"]):not(button, input, textarea, select, span) {
+  background-color: rgba(255, 255, 255, .045);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-color: rgba(255, 255, 255, .1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 20px 40px -24px rgba(0, 0, 0, .6);
+}
+html[data-theme="ocean"] .app-shell .app-navbar { background: rgba(7, 12, 26, .45); border-color: rgba(255, 255, 255, .06); }
+html[data-theme="ocean"] .app-shell .app-sidebar {
+  background: rgba(255, 255, 255, .045);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+}
+html[data-theme="ocean"] .app-shell .bg-purple-600 { border-radius: 9999px; }
+html[data-theme="ocean"] .app-shell .nav-item { border-radius: 9999px; }
+html[data-theme="ocean"] .app-shell .nav-item[data-active] {
+  background: linear-gradient(90deg, rgba(53, 89, 240, .45), rgba(34, 211, 238, .18));
+  border-color: rgba(34, 211, 238, .45);
+  box-shadow: 0 0 22px -6px rgba(34, 211, 238, .6);
+}
+html[data-theme="ocean"] .app-shell .nav-item[data-active] .nav-icon { color: #67E8F9; }
+
+/* ── 4. Lavender Cloud: pastel gradient sky, airy glass-white cards, rounded headings ── */
+html[data-theme="lavender"] .app-shell {
+  --theme-font: var(--font-jakarta), sans-serif;
+  --theme-heading: var(--font-fredoka), var(--font-jakarta), sans-serif;
+  --theme-button: linear-gradient(135deg, #8B6CF6, #B07CF5 50%, #F472B6);
+  --theme-glow: rgba(139, 108, 246, .5);
+  --theme-card-shadow: 0 2px 6px rgba(90, 60, 180, .05), 0 16px 36px -18px rgba(90, 60, 180, .3);
+  --theme-blobs:
+    radial-gradient(40% 40% at 0% 0%, rgba(167, 139, 250, .5), transparent 70%),
+    radial-gradient(36% 36% at 100% 8%, rgba(110, 228, 195, .45), transparent 70%),
+    radial-gradient(42% 42% at 50% 100%, rgba(249, 168, 212, .45), transparent 70%);
+  --radius-lg: .75rem; --radius-xl: 1.125rem; --radius-2xl: 1.6rem; --radius-3xl: 2.25rem;
+  background-image: linear-gradient(160deg, #F4F0FF 0%, #F0FBF7 50%, #FFF3F8 100%);
+}
+html[data-theme="lavender"] .app-shell :is(h1, h2, h3) { font-weight: 600; letter-spacing: 0; }
+html[data-theme="lavender"] .app-shell :is(.glass-panel, .glass-card, article, [class*="bg-zinc-900"]):not(button, input, textarea, select, span) {
+  background-color: rgba(255, 255, 255, .62);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-color: rgba(255, 255, 255, .9);
+}
+html[data-theme="lavender"] .app-shell .bg-purple-600 { border-radius: 9999px; }
+html[data-theme="lavender"] .app-shell .app-sidebar {
+  background: linear-gradient(180deg, #E9E1FF 0%, #E0F7EF 55%, #FFE6F2 100%);
+  box-shadow: var(--theme-card-shadow), inset 0 0 0 1px rgba(255, 255, 255, .9);
+}
+html[data-theme="lavender"] .app-shell .nav-item { border-color: transparent; border-radius: 9999px; }
+html[data-theme="lavender"] .app-shell .nav-icon { color: #8B6CF6; }
+html[data-theme="lavender"] .app-shell .nav-item:hover { background: rgba(255, 255, 255, .6); }
+html[data-theme="lavender"] .app-shell .nav-item[data-active] {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 8px 20px -10px rgba(90, 60, 180, .45);
+}
+html[data-theme="lavender"] .app-shell .nav-item[data-active] .nav-icon { color: #6240C9; }
+html[data-theme="lavender"] .app-shell .app-navbar { background: rgba(255, 255, 255, .5); }
+
+/* Colour scales per theme. Light themes flip the dark palette; photos, overlays and solid buttons keep light-on-dark colours. */
+html[data-theme="gennook"] .app-shell {
+  --ink: #0B2B2E; --color-white: var(--ink);
+  --color-zinc-50: #081A17; --color-zinc-100: #10241F; --color-zinc-200: #1E3633; --color-zinc-300: #34504D; --color-zinc-400: #4F6B68; --color-zinc-500: #6E8C88; --color-zinc-600: #9DB7B3; --color-zinc-700: #CFE0DD; --color-zinc-800: #E3EEEC; --color-zinc-900: #FFFFFF; --color-zinc-950: #F1F7F6;
+  --color-purple-50: #032A2F; --color-purple-100: #053F46; --color-purple-200: #06515A; --color-purple-300: #06515A; --color-purple-400: #08676F; --color-purple-500: #0B8089; --color-purple-600: #0B8089; --color-purple-700: #139CA6; --color-purple-800: #A8E7EA; --color-purple-900: #D4F4F5; --color-purple-950: #EEFBFB;
+  --color-fuchsia-50: #462704; --color-fuchsia-100: #7C4C0D; --color-fuchsia-200: #985C0B; --color-fuchsia-300: #985C0B; --color-fuchsia-400: #BC7605; --color-fuchsia-500: #E39A07; --color-fuchsia-600: #E39A07; --color-fuchsia-700: #F9B51B; --color-fuchsia-800: #FDE28A; --color-fuchsia-900: #FEF1C7; --color-fuchsia-950: #FFFAEB;
+  --color-pink-50: #462704; --color-pink-100: #7C4C0D; --color-pink-200: #985C0B; --color-pink-300: #985C0B; --color-pink-400: #BC7605; --color-pink-500: #E39A07; --color-pink-600: #E39A07; --color-pink-700: #F9B51B; --color-pink-800: #FDE28A; --color-pink-900: #FEF1C7; --color-pink-950: #FFFAEB;
+  --color-indigo-50: #052622; --color-indigo-100: #11413B; --color-indigo-200: #104F47; --color-indigo-300: #104F47; --color-indigo-400: #0F6357; --color-indigo-500: #0E7C6B; --color-indigo-600: #0E7C6B; --color-indigo-700: #159A84; --color-indigo-800: #A0E4D6; --color-indigo-900: #CFF2EA; --color-indigo-950: #ECFAF7;
+  --color-emerald-50: oklch(26.2% 0.051 172.552); --color-emerald-100: oklch(37.8% 0.077 168.94); --color-emerald-200: oklch(43.2% 0.095 166.913); --color-emerald-300: oklch(43.2% 0.095 166.913); --color-emerald-400: oklch(50.8% 0.118 165.612); --color-emerald-500: oklch(59.6% 0.145 163.225); --color-emerald-600: oklch(59.6% 0.145 163.225); --color-emerald-700: oklch(69.6% 0.17 162.48); --color-emerald-800: oklch(90.5% 0.093 164.15); --color-emerald-900: oklch(95% 0.052 163.051); --color-emerald-950: oklch(97.9% 0.021 166.113);
+  --color-rose-50: oklch(27.1% 0.105 12.094); --color-rose-100: oklch(41% 0.159 10.272); --color-rose-200: oklch(45.5% 0.188 13.697); --color-rose-300: oklch(45.5% 0.188 13.697); --color-rose-400: oklch(51.4% 0.222 16.935); --color-rose-500: oklch(58.6% 0.253 17.585); --color-rose-600: oklch(58.6% 0.253 17.585); --color-rose-700: oklch(64.5% 0.246 16.439); --color-rose-800: oklch(89.2% 0.058 10.001); --color-rose-900: oklch(94.1% 0.03 12.58); --color-rose-950: oklch(96.9% 0.015 12.422);
+  --color-amber-50: oklch(27.9% 0.077 45.635); --color-amber-100: oklch(41.4% 0.112 45.904); --color-amber-200: oklch(47.3% 0.137 46.201); --color-amber-300: oklch(47.3% 0.137 46.201); --color-amber-400: oklch(55.5% 0.163 48.998); --color-amber-500: oklch(66.6% 0.179 58.318); --color-amber-600: oklch(66.6% 0.179 58.318); --color-amber-700: oklch(76.9% 0.188 70.08); --color-amber-800: oklch(92.4% 0.12 95.746); --color-amber-900: oklch(96.2% 0.059 95.617); --color-amber-950: oklch(98.7% 0.022 95.277);
+  --color-red-50: oklch(25.8% 0.092 26.042); --color-red-100: oklch(39.6% 0.141 25.723); --color-red-200: oklch(44.4% 0.177 26.899); --color-red-300: oklch(44.4% 0.177 26.899); --color-red-400: oklch(50.5% 0.213 27.518); --color-red-500: oklch(57.7% 0.245 27.325); --color-red-600: oklch(57.7% 0.245 27.325); --color-red-700: oklch(63.7% 0.237 25.331); --color-red-800: oklch(88.5% 0.062 18.334); --color-red-900: oklch(93.6% 0.032 17.717); --color-red-950: oklch(97.1% 0.013 17.38);
+  --color-sky-50: oklch(29.3% 0.066 243.157); --color-sky-100: oklch(39.1% 0.09 240.876); --color-sky-200: oklch(44.3% 0.11 240.79); --color-sky-300: oklch(44.3% 0.11 240.79); --color-sky-400: oklch(50% 0.134 242.749); --color-sky-500: oklch(58.8% 0.158 241.966); --color-sky-600: oklch(58.8% 0.158 241.966); --color-sky-700: oklch(68.5% 0.169 237.323); --color-sky-800: oklch(90.1% 0.058 230.902); --color-sky-900: oklch(95.1% 0.026 236.824); --color-sky-950: oklch(97.7% 0.013 236.62);
+}
+html[data-theme="gennook"] .app-shell :is([class*="bg-black"]:not(.inset-0), .bg-purple-600, .bg-purple-500, [class*="from-purple-5"], [class*="from-purple-6"], [class*="from-rose-"], .bg-red-600, .bg-red-500, .bg-emerald-600, .bg-emerald-500, .bg-rose-600, .bg-rose-500) {
+  --color-white: #fff;
+  --color-zinc-50: oklch(98.5% 0 none); --color-zinc-100: oklch(96.7% 0.001 286.375); --color-zinc-200: oklch(92% 0.004 286.32); --color-zinc-300: oklch(87.1% 0.006 286.286); --color-zinc-400: oklch(70.5% 0.015 286.067); --color-zinc-500: oklch(55.2% 0.016 285.938); --color-zinc-600: oklch(44.2% 0.017 285.786); --color-zinc-700: oklch(37% 0.013 285.805); --color-zinc-800: oklch(27.4% 0.006 286.033); --color-zinc-900: oklch(21% 0.006 285.885); --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-purple-50: #EEFBFB; --color-purple-100: #D4F4F5; --color-purple-200: #A8E7EA; --color-purple-300: #6FD3D9; --color-purple-400: #35B8C0; --color-purple-500: #139CA6; --color-purple-600: #0B8089; --color-purple-700: #08676F; --color-purple-800: #06515A; --color-purple-900: #053F46; --color-purple-950: #032A2F;
+  --color-fuchsia-50: #FFFAEB; --color-fuchsia-100: #FEF1C7; --color-fuchsia-200: #FDE28A; --color-fuchsia-300: #FCD15A; --color-fuchsia-400: #FBC23A; --color-fuchsia-500: #F9B51B; --color-fuchsia-600: #E39A07; --color-fuchsia-700: #BC7605; --color-fuchsia-800: #985C0B; --color-fuchsia-900: #7C4C0D; --color-fuchsia-950: #462704;
+  --color-pink-50: #FFFAEB; --color-pink-100: #FEF1C7; --color-pink-200: #FDE28A; --color-pink-300: #FCD15A; --color-pink-400: #FBC23A; --color-pink-500: #F9B51B; --color-pink-600: #E39A07; --color-pink-700: #BC7605; --color-pink-800: #985C0B; --color-pink-900: #7C4C0D; --color-pink-950: #462704;
+  --color-indigo-50: #ECFAF7; --color-indigo-100: #CFF2EA; --color-indigo-200: #A0E4D6; --color-indigo-300: #64CFBB; --color-indigo-400: #2FB59D; --color-indigo-500: #159A84; --color-indigo-600: #0E7C6B; --color-indigo-700: #0F6357; --color-indigo-800: #104F47; --color-indigo-900: #11413B; --color-indigo-950: #052622;
+  --color-emerald-50: oklch(97.9% 0.021 166.113); --color-emerald-100: oklch(95% 0.052 163.051); --color-emerald-200: oklch(90.5% 0.093 164.15); --color-emerald-300: oklch(84.5% 0.143 164.978); --color-emerald-400: oklch(76.5% 0.177 163.223); --color-emerald-500: oklch(69.6% 0.17 162.48); --color-emerald-600: oklch(59.6% 0.145 163.225); --color-emerald-700: oklch(50.8% 0.118 165.612); --color-emerald-800: oklch(43.2% 0.095 166.913); --color-emerald-900: oklch(37.8% 0.077 168.94); --color-emerald-950: oklch(26.2% 0.051 172.552);
+  --color-rose-50: oklch(96.9% 0.015 12.422); --color-rose-100: oklch(94.1% 0.03 12.58); --color-rose-200: oklch(89.2% 0.058 10.001); --color-rose-300: oklch(81% 0.117 11.638); --color-rose-400: oklch(71.2% 0.194 13.428); --color-rose-500: oklch(64.5% 0.246 16.439); --color-rose-600: oklch(58.6% 0.253 17.585); --color-rose-700: oklch(51.4% 0.222 16.935); --color-rose-800: oklch(45.5% 0.188 13.697); --color-rose-900: oklch(41% 0.159 10.272); --color-rose-950: oklch(27.1% 0.105 12.094);
+  --color-amber-50: oklch(98.7% 0.022 95.277); --color-amber-100: oklch(96.2% 0.059 95.617); --color-amber-200: oklch(92.4% 0.12 95.746); --color-amber-300: oklch(87.9% 0.169 91.605); --color-amber-400: oklch(82.8% 0.189 84.429); --color-amber-500: oklch(76.9% 0.188 70.08); --color-amber-600: oklch(66.6% 0.179 58.318); --color-amber-700: oklch(55.5% 0.163 48.998); --color-amber-800: oklch(47.3% 0.137 46.201); --color-amber-900: oklch(41.4% 0.112 45.904); --color-amber-950: oklch(27.9% 0.077 45.635);
+  --color-red-50: oklch(97.1% 0.013 17.38); --color-red-100: oklch(93.6% 0.032 17.717); --color-red-200: oklch(88.5% 0.062 18.334); --color-red-300: oklch(80.8% 0.114 19.571); --color-red-400: oklch(70.4% 0.191 22.216); --color-red-500: oklch(63.7% 0.237 25.331); --color-red-600: oklch(57.7% 0.245 27.325); --color-red-700: oklch(50.5% 0.213 27.518); --color-red-800: oklch(44.4% 0.177 26.899); --color-red-900: oklch(39.6% 0.141 25.723); --color-red-950: oklch(25.8% 0.092 26.042);
+  --color-sky-50: oklch(97.7% 0.013 236.62); --color-sky-100: oklch(95.1% 0.026 236.824); --color-sky-200: oklch(90.1% 0.058 230.902); --color-sky-300: oklch(82.8% 0.111 230.318); --color-sky-400: oklch(74.6% 0.16 232.661); --color-sky-500: oklch(68.5% 0.169 237.323); --color-sky-600: oklch(58.8% 0.158 241.966); --color-sky-700: oklch(50% 0.134 242.749); --color-sky-800: oklch(44.3% 0.11 240.79); --color-sky-900: oklch(39.1% 0.09 240.876); --color-sky-950: oklch(29.3% 0.066 243.157);
+}
+html[data-theme="sunset"] .app-shell {
+  --ink: #2B1B14; --color-white: var(--ink);
+  --color-zinc-50: #170D09; --color-zinc-100: #261812; --color-zinc-200: #3A2820; --color-zinc-300: #573F33; --color-zinc-400: #7A5F50; --color-zinc-500: #9C806E; --color-zinc-600: #CDB3A1; --color-zinc-700: #ECD6C6; --color-zinc-800: #F6E7DB; --color-zinc-900: #FFFFFF; --color-zinc-950: #FFF6EE;
+  --color-purple-50: #48130E; --color-purple-100: #842D24; --color-purple-200: #A13125; --color-purple-300: #A13125; --color-purple-400: #C93A29; --color-purple-500: #F04B37; --color-purple-600: #F04B37; --color-purple-700: #FF6550; --color-purple-800: #FFD0C7; --color-purple-900: #FFE6E1; --color-purple-950: #FFF4F2;
+  --color-fuchsia-50: #461703; --color-fuchsia-100: #7A310F; --color-fuchsia-200: #953A0E; --color-fuchsia-300: #953A0E; --color-fuchsia-400: #B84B08; --color-fuchsia-500: #DE6D05; --color-fuchsia-600: #DE6D05; --color-fuchsia-700: #FB910B; --color-fuchsia-800: #FFDA8A; --color-fuchsia-900: #FFEDC7; --color-fuchsia-950: #FFF8EB;
+  --color-pink-50: #461703; --color-pink-100: #7A310F; --color-pink-200: #953A0E; --color-pink-300: #953A0E; --color-pink-400: #B84B08; --color-pink-500: #DE6D05; --color-pink-600: #DE6D05; --color-pink-700: #FB910B; --color-pink-800: #FFDA8A; --color-pink-900: #FFEDC7; --color-pink-950: #FFF8EB;
+  --color-indigo-50: #500724; --color-indigo-100: #831843; --color-indigo-200: #9D174D; --color-indigo-300: #9D174D; --color-indigo-400: #BE185D; --color-indigo-500: #DB2777; --color-indigo-600: #DB2777; --color-indigo-700: #EC4899; --color-indigo-800: #FBCFE8; --color-indigo-900: #FCE7F3; --color-indigo-950: #FDF2F8;
+  --color-emerald-50: oklch(26.2% 0.051 172.552); --color-emerald-100: oklch(37.8% 0.077 168.94); --color-emerald-200: oklch(43.2% 0.095 166.913); --color-emerald-300: oklch(43.2% 0.095 166.913); --color-emerald-400: oklch(50.8% 0.118 165.612); --color-emerald-500: oklch(59.6% 0.145 163.225); --color-emerald-600: oklch(59.6% 0.145 163.225); --color-emerald-700: oklch(69.6% 0.17 162.48); --color-emerald-800: oklch(90.5% 0.093 164.15); --color-emerald-900: oklch(95% 0.052 163.051); --color-emerald-950: oklch(97.9% 0.021 166.113);
+  --color-rose-50: oklch(27.1% 0.105 12.094); --color-rose-100: oklch(41% 0.159 10.272); --color-rose-200: oklch(45.5% 0.188 13.697); --color-rose-300: oklch(45.5% 0.188 13.697); --color-rose-400: oklch(51.4% 0.222 16.935); --color-rose-500: oklch(58.6% 0.253 17.585); --color-rose-600: oklch(58.6% 0.253 17.585); --color-rose-700: oklch(64.5% 0.246 16.439); --color-rose-800: oklch(89.2% 0.058 10.001); --color-rose-900: oklch(94.1% 0.03 12.58); --color-rose-950: oklch(96.9% 0.015 12.422);
+  --color-amber-50: oklch(27.9% 0.077 45.635); --color-amber-100: oklch(41.4% 0.112 45.904); --color-amber-200: oklch(47.3% 0.137 46.201); --color-amber-300: oklch(47.3% 0.137 46.201); --color-amber-400: oklch(55.5% 0.163 48.998); --color-amber-500: oklch(66.6% 0.179 58.318); --color-amber-600: oklch(66.6% 0.179 58.318); --color-amber-700: oklch(76.9% 0.188 70.08); --color-amber-800: oklch(92.4% 0.12 95.746); --color-amber-900: oklch(96.2% 0.059 95.617); --color-amber-950: oklch(98.7% 0.022 95.277);
+  --color-red-50: oklch(25.8% 0.092 26.042); --color-red-100: oklch(39.6% 0.141 25.723); --color-red-200: oklch(44.4% 0.177 26.899); --color-red-300: oklch(44.4% 0.177 26.899); --color-red-400: oklch(50.5% 0.213 27.518); --color-red-500: oklch(57.7% 0.245 27.325); --color-red-600: oklch(57.7% 0.245 27.325); --color-red-700: oklch(63.7% 0.237 25.331); --color-red-800: oklch(88.5% 0.062 18.334); --color-red-900: oklch(93.6% 0.032 17.717); --color-red-950: oklch(97.1% 0.013 17.38);
+  --color-sky-50: oklch(29.3% 0.066 243.157); --color-sky-100: oklch(39.1% 0.09 240.876); --color-sky-200: oklch(44.3% 0.11 240.79); --color-sky-300: oklch(44.3% 0.11 240.79); --color-sky-400: oklch(50% 0.134 242.749); --color-sky-500: oklch(58.8% 0.158 241.966); --color-sky-600: oklch(58.8% 0.158 241.966); --color-sky-700: oklch(68.5% 0.169 237.323); --color-sky-800: oklch(90.1% 0.058 230.902); --color-sky-900: oklch(95.1% 0.026 236.824); --color-sky-950: oklch(97.7% 0.013 236.62);
+}
+html[data-theme="sunset"] .app-shell :is([class*="bg-black"]:not(.inset-0), .bg-purple-600, .bg-purple-500, [class*="from-purple-5"], [class*="from-purple-6"], [class*="from-rose-"], .bg-red-600, .bg-red-500, .bg-emerald-600, .bg-emerald-500, .bg-rose-600, .bg-rose-500) {
+  --color-white: #fff;
+  --color-zinc-50: oklch(98.5% 0 none); --color-zinc-100: oklch(96.7% 0.001 286.375); --color-zinc-200: oklch(92% 0.004 286.32); --color-zinc-300: oklch(87.1% 0.006 286.286); --color-zinc-400: oklch(70.5% 0.015 286.067); --color-zinc-500: oklch(55.2% 0.016 285.938); --color-zinc-600: oklch(44.2% 0.017 285.786); --color-zinc-700: oklch(37% 0.013 285.805); --color-zinc-800: oklch(27.4% 0.006 286.033); --color-zinc-900: oklch(21% 0.006 285.885); --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-purple-50: #FFF4F2; --color-purple-100: #FFE6E1; --color-purple-200: #FFD0C7; --color-purple-300: #FFAE9F; --color-purple-400: #FF8670; --color-purple-500: #FF6550; --color-purple-600: #F04B37; --color-purple-700: #C93A29; --color-purple-800: #A13125; --color-purple-900: #842D24; --color-purple-950: #48130E;
+  --color-fuchsia-50: #FFF8EB; --color-fuchsia-100: #FFEDC7; --color-fuchsia-200: #FFDA8A; --color-fuchsia-300: #FFC24D; --color-fuchsia-400: #FFAB24; --color-fuchsia-500: #FB910B; --color-fuchsia-600: #DE6D05; --color-fuchsia-700: #B84B08; --color-fuchsia-800: #953A0E; --color-fuchsia-900: #7A310F; --color-fuchsia-950: #461703;
+  --color-pink-50: #FFF8EB; --color-pink-100: #FFEDC7; --color-pink-200: #FFDA8A; --color-pink-300: #FFC24D; --color-pink-400: #FFAB24; --color-pink-500: #FB910B; --color-pink-600: #DE6D05; --color-pink-700: #B84B08; --color-pink-800: #953A0E; --color-pink-900: #7A310F; --color-pink-950: #461703;
+  --color-indigo-50: #FDF2F8; --color-indigo-100: #FCE7F3; --color-indigo-200: #FBCFE8; --color-indigo-300: #F9A8D4; --color-indigo-400: #F472B6; --color-indigo-500: #EC4899; --color-indigo-600: #DB2777; --color-indigo-700: #BE185D; --color-indigo-800: #9D174D; --color-indigo-900: #831843; --color-indigo-950: #500724;
+  --color-emerald-50: oklch(97.9% 0.021 166.113); --color-emerald-100: oklch(95% 0.052 163.051); --color-emerald-200: oklch(90.5% 0.093 164.15); --color-emerald-300: oklch(84.5% 0.143 164.978); --color-emerald-400: oklch(76.5% 0.177 163.223); --color-emerald-500: oklch(69.6% 0.17 162.48); --color-emerald-600: oklch(59.6% 0.145 163.225); --color-emerald-700: oklch(50.8% 0.118 165.612); --color-emerald-800: oklch(43.2% 0.095 166.913); --color-emerald-900: oklch(37.8% 0.077 168.94); --color-emerald-950: oklch(26.2% 0.051 172.552);
+  --color-rose-50: oklch(96.9% 0.015 12.422); --color-rose-100: oklch(94.1% 0.03 12.58); --color-rose-200: oklch(89.2% 0.058 10.001); --color-rose-300: oklch(81% 0.117 11.638); --color-rose-400: oklch(71.2% 0.194 13.428); --color-rose-500: oklch(64.5% 0.246 16.439); --color-rose-600: oklch(58.6% 0.253 17.585); --color-rose-700: oklch(51.4% 0.222 16.935); --color-rose-800: oklch(45.5% 0.188 13.697); --color-rose-900: oklch(41% 0.159 10.272); --color-rose-950: oklch(27.1% 0.105 12.094);
+  --color-amber-50: oklch(98.7% 0.022 95.277); --color-amber-100: oklch(96.2% 0.059 95.617); --color-amber-200: oklch(92.4% 0.12 95.746); --color-amber-300: oklch(87.9% 0.169 91.605); --color-amber-400: oklch(82.8% 0.189 84.429); --color-amber-500: oklch(76.9% 0.188 70.08); --color-amber-600: oklch(66.6% 0.179 58.318); --color-amber-700: oklch(55.5% 0.163 48.998); --color-amber-800: oklch(47.3% 0.137 46.201); --color-amber-900: oklch(41.4% 0.112 45.904); --color-amber-950: oklch(27.9% 0.077 45.635);
+  --color-red-50: oklch(97.1% 0.013 17.38); --color-red-100: oklch(93.6% 0.032 17.717); --color-red-200: oklch(88.5% 0.062 18.334); --color-red-300: oklch(80.8% 0.114 19.571); --color-red-400: oklch(70.4% 0.191 22.216); --color-red-500: oklch(63.7% 0.237 25.331); --color-red-600: oklch(57.7% 0.245 27.325); --color-red-700: oklch(50.5% 0.213 27.518); --color-red-800: oklch(44.4% 0.177 26.899); --color-red-900: oklch(39.6% 0.141 25.723); --color-red-950: oklch(25.8% 0.092 26.042);
+  --color-sky-50: oklch(97.7% 0.013 236.62); --color-sky-100: oklch(95.1% 0.026 236.824); --color-sky-200: oklch(90.1% 0.058 230.902); --color-sky-300: oklch(82.8% 0.111 230.318); --color-sky-400: oklch(74.6% 0.16 232.661); --color-sky-500: oklch(68.5% 0.169 237.323); --color-sky-600: oklch(58.8% 0.158 241.966); --color-sky-700: oklch(50% 0.134 242.749); --color-sky-800: oklch(44.3% 0.11 240.79); --color-sky-900: oklch(39.1% 0.09 240.876); --color-sky-950: oklch(29.3% 0.066 243.157);
+}
+html[data-theme="lavender"] .app-shell {
+  --ink: #2A2147; --color-white: var(--ink);
+  --color-zinc-50: #130E28; --color-zinc-100: #211A3D; --color-zinc-200: #322955; --color-zinc-300: #4B4070; --color-zinc-400: #685C8C; --color-zinc-500: #8A7DB0; --color-zinc-600: #B6AAD6; --color-zinc-700: #DDD4F3; --color-zinc-800: #ECE6FA; --color-zinc-900: #FFFFFF; --color-zinc-950: #F6F3FF;
+  --color-purple-50: #28194F; --color-purple-100: #432C84; --color-purple-200: #4F33A3; --color-purple-300: #4F33A3; --color-purple-400: #6240C9; --color-purple-500: #7451E8; --color-purple-600: #7451E8; --color-purple-700: #8B6CF6; --color-purple-800: #DDD6FE; --color-purple-900: #EDE9FE; --color-purple-950: #F5F3FF;
+  --color-fuchsia-50: #052B25; --color-fuchsia-100: #0F4B40; --color-fuchsia-200: #0F5B4D; --color-fuchsia-300: #0F5B4D; --color-fuchsia-400: #0D735F; --color-fuchsia-500: #0C9174; --color-fuchsia-600: #0C9174; --color-fuchsia-700: #16B38F; --color-fuchsia-800: #A7F1DA; --color-fuchsia-900: #D2F9EC; --color-fuchsia-950: #EDFDF7;
+  --color-pink-50: #052B25; --color-pink-100: #0F4B40; --color-pink-200: #0F5B4D; --color-pink-300: #0F5B4D; --color-pink-400: #0D735F; --color-pink-500: #0C9174; --color-pink-600: #0C9174; --color-pink-700: #16B38F; --color-pink-800: #A7F1DA; --color-pink-900: #D2F9EC; --color-pink-950: #EDFDF7;
+  --color-indigo-50: #500724; --color-indigo-100: #831843; --color-indigo-200: #9D174D; --color-indigo-300: #9D174D; --color-indigo-400: #BE185D; --color-indigo-500: #DB2777; --color-indigo-600: #DB2777; --color-indigo-700: #EC4899; --color-indigo-800: #FBCFE8; --color-indigo-900: #FCE7F3; --color-indigo-950: #FDF2F8;
+  --color-emerald-50: oklch(26.2% 0.051 172.552); --color-emerald-100: oklch(37.8% 0.077 168.94); --color-emerald-200: oklch(43.2% 0.095 166.913); --color-emerald-300: oklch(43.2% 0.095 166.913); --color-emerald-400: oklch(50.8% 0.118 165.612); --color-emerald-500: oklch(59.6% 0.145 163.225); --color-emerald-600: oklch(59.6% 0.145 163.225); --color-emerald-700: oklch(69.6% 0.17 162.48); --color-emerald-800: oklch(90.5% 0.093 164.15); --color-emerald-900: oklch(95% 0.052 163.051); --color-emerald-950: oklch(97.9% 0.021 166.113);
+  --color-rose-50: oklch(27.1% 0.105 12.094); --color-rose-100: oklch(41% 0.159 10.272); --color-rose-200: oklch(45.5% 0.188 13.697); --color-rose-300: oklch(45.5% 0.188 13.697); --color-rose-400: oklch(51.4% 0.222 16.935); --color-rose-500: oklch(58.6% 0.253 17.585); --color-rose-600: oklch(58.6% 0.253 17.585); --color-rose-700: oklch(64.5% 0.246 16.439); --color-rose-800: oklch(89.2% 0.058 10.001); --color-rose-900: oklch(94.1% 0.03 12.58); --color-rose-950: oklch(96.9% 0.015 12.422);
+  --color-amber-50: oklch(27.9% 0.077 45.635); --color-amber-100: oklch(41.4% 0.112 45.904); --color-amber-200: oklch(47.3% 0.137 46.201); --color-amber-300: oklch(47.3% 0.137 46.201); --color-amber-400: oklch(55.5% 0.163 48.998); --color-amber-500: oklch(66.6% 0.179 58.318); --color-amber-600: oklch(66.6% 0.179 58.318); --color-amber-700: oklch(76.9% 0.188 70.08); --color-amber-800: oklch(92.4% 0.12 95.746); --color-amber-900: oklch(96.2% 0.059 95.617); --color-amber-950: oklch(98.7% 0.022 95.277);
+  --color-red-50: oklch(25.8% 0.092 26.042); --color-red-100: oklch(39.6% 0.141 25.723); --color-red-200: oklch(44.4% 0.177 26.899); --color-red-300: oklch(44.4% 0.177 26.899); --color-red-400: oklch(50.5% 0.213 27.518); --color-red-500: oklch(57.7% 0.245 27.325); --color-red-600: oklch(57.7% 0.245 27.325); --color-red-700: oklch(63.7% 0.237 25.331); --color-red-800: oklch(88.5% 0.062 18.334); --color-red-900: oklch(93.6% 0.032 17.717); --color-red-950: oklch(97.1% 0.013 17.38);
+  --color-sky-50: oklch(29.3% 0.066 243.157); --color-sky-100: oklch(39.1% 0.09 240.876); --color-sky-200: oklch(44.3% 0.11 240.79); --color-sky-300: oklch(44.3% 0.11 240.79); --color-sky-400: oklch(50% 0.134 242.749); --color-sky-500: oklch(58.8% 0.158 241.966); --color-sky-600: oklch(58.8% 0.158 241.966); --color-sky-700: oklch(68.5% 0.169 237.323); --color-sky-800: oklch(90.1% 0.058 230.902); --color-sky-900: oklch(95.1% 0.026 236.824); --color-sky-950: oklch(97.7% 0.013 236.62);
+}
+html[data-theme="lavender"] .app-shell :is([class*="bg-black"]:not(.inset-0), .bg-purple-600, .bg-purple-500, [class*="from-purple-5"], [class*="from-purple-6"], [class*="from-rose-"], .bg-red-600, .bg-red-500, .bg-emerald-600, .bg-emerald-500, .bg-rose-600, .bg-rose-500) {
+  --color-white: #fff;
+  --color-zinc-50: oklch(98.5% 0 none); --color-zinc-100: oklch(96.7% 0.001 286.375); --color-zinc-200: oklch(92% 0.004 286.32); --color-zinc-300: oklch(87.1% 0.006 286.286); --color-zinc-400: oklch(70.5% 0.015 286.067); --color-zinc-500: oklch(55.2% 0.016 285.938); --color-zinc-600: oklch(44.2% 0.017 285.786); --color-zinc-700: oklch(37% 0.013 285.805); --color-zinc-800: oklch(27.4% 0.006 286.033); --color-zinc-900: oklch(21% 0.006 285.885); --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-purple-50: #F5F3FF; --color-purple-100: #EDE9FE; --color-purple-200: #DDD6FE; --color-purple-300: #C4B5FD; --color-purple-400: #A78BFA; --color-purple-500: #8B6CF6; --color-purple-600: #7451E8; --color-purple-700: #6240C9; --color-purple-800: #4F33A3; --color-purple-900: #432C84; --color-purple-950: #28194F;
+  --color-fuchsia-50: #EDFDF7; --color-fuchsia-100: #D2F9EC; --color-fuchsia-200: #A7F1DA; --color-fuchsia-300: #6EE4C3; --color-fuchsia-400: #36CFA8; --color-fuchsia-500: #16B38F; --color-fuchsia-600: #0C9174; --color-fuchsia-700: #0D735F; --color-fuchsia-800: #0F5B4D; --color-fuchsia-900: #0F4B40; --color-fuchsia-950: #052B25;
+  --color-pink-50: #EDFDF7; --color-pink-100: #D2F9EC; --color-pink-200: #A7F1DA; --color-pink-300: #6EE4C3; --color-pink-400: #36CFA8; --color-pink-500: #16B38F; --color-pink-600: #0C9174; --color-pink-700: #0D735F; --color-pink-800: #0F5B4D; --color-pink-900: #0F4B40; --color-pink-950: #052B25;
+  --color-indigo-50: #FDF2F8; --color-indigo-100: #FCE7F3; --color-indigo-200: #FBCFE8; --color-indigo-300: #F9A8D4; --color-indigo-400: #F472B6; --color-indigo-500: #EC4899; --color-indigo-600: #DB2777; --color-indigo-700: #BE185D; --color-indigo-800: #9D174D; --color-indigo-900: #831843; --color-indigo-950: #500724;
+  --color-emerald-50: oklch(97.9% 0.021 166.113); --color-emerald-100: oklch(95% 0.052 163.051); --color-emerald-200: oklch(90.5% 0.093 164.15); --color-emerald-300: oklch(84.5% 0.143 164.978); --color-emerald-400: oklch(76.5% 0.177 163.223); --color-emerald-500: oklch(69.6% 0.17 162.48); --color-emerald-600: oklch(59.6% 0.145 163.225); --color-emerald-700: oklch(50.8% 0.118 165.612); --color-emerald-800: oklch(43.2% 0.095 166.913); --color-emerald-900: oklch(37.8% 0.077 168.94); --color-emerald-950: oklch(26.2% 0.051 172.552);
+  --color-rose-50: oklch(96.9% 0.015 12.422); --color-rose-100: oklch(94.1% 0.03 12.58); --color-rose-200: oklch(89.2% 0.058 10.001); --color-rose-300: oklch(81% 0.117 11.638); --color-rose-400: oklch(71.2% 0.194 13.428); --color-rose-500: oklch(64.5% 0.246 16.439); --color-rose-600: oklch(58.6% 0.253 17.585); --color-rose-700: oklch(51.4% 0.222 16.935); --color-rose-800: oklch(45.5% 0.188 13.697); --color-rose-900: oklch(41% 0.159 10.272); --color-rose-950: oklch(27.1% 0.105 12.094);
+  --color-amber-50: oklch(98.7% 0.022 95.277); --color-amber-100: oklch(96.2% 0.059 95.617); --color-amber-200: oklch(92.4% 0.12 95.746); --color-amber-300: oklch(87.9% 0.169 91.605); --color-amber-400: oklch(82.8% 0.189 84.429); --color-amber-500: oklch(76.9% 0.188 70.08); --color-amber-600: oklch(66.6% 0.179 58.318); --color-amber-700: oklch(55.5% 0.163 48.998); --color-amber-800: oklch(47.3% 0.137 46.201); --color-amber-900: oklch(41.4% 0.112 45.904); --color-amber-950: oklch(27.9% 0.077 45.635);
+  --color-red-50: oklch(97.1% 0.013 17.38); --color-red-100: oklch(93.6% 0.032 17.717); --color-red-200: oklch(88.5% 0.062 18.334); --color-red-300: oklch(80.8% 0.114 19.571); --color-red-400: oklch(70.4% 0.191 22.216); --color-red-500: oklch(63.7% 0.237 25.331); --color-red-600: oklch(57.7% 0.245 27.325); --color-red-700: oklch(50.5% 0.213 27.518); --color-red-800: oklch(44.4% 0.177 26.899); --color-red-900: oklch(39.6% 0.141 25.723); --color-red-950: oklch(25.8% 0.092 26.042);
+  --color-sky-50: oklch(97.7% 0.013 236.62); --color-sky-100: oklch(95.1% 0.026 236.824); --color-sky-200: oklch(90.1% 0.058 230.902); --color-sky-300: oklch(82.8% 0.111 230.318); --color-sky-400: oklch(74.6% 0.16 232.661); --color-sky-500: oklch(68.5% 0.169 237.323); --color-sky-600: oklch(58.8% 0.158 241.966); --color-sky-700: oklch(50% 0.134 242.749); --color-sky-800: oklch(44.3% 0.11 240.79); --color-sky-900: oklch(39.1% 0.09 240.876); --color-sky-950: oklch(29.3% 0.066 243.157);
+}
+html[data-theme="ocean"] .app-shell {
+  --color-zinc-50: #F6F8FC; --color-zinc-100: #ECF0F8; --color-zinc-200: #D9E0EE; --color-zinc-300: #B9C4DC; --color-zinc-400: #8F9DC0; --color-zinc-500: #66749A; --color-zinc-600: #46537A; --color-zinc-700: #2E3A5E; --color-zinc-800: #1A2442; --color-zinc-900: #10182F; --color-zinc-950: #070C1A;
+  --color-purple-50: #F2F6FF; --color-purple-100: #E3ECFF; --color-purple-200: #C9D9FF; --color-purple-300: #A2BDFF; --color-purple-400: #7598FF; --color-purple-500: #4F78FF; --color-purple-600: #3559F0; --color-purple-700: #2846CC; --color-purple-800: #2139A3; --color-purple-900: #1E3380; --color-purple-950: #141F4D;
+  --color-fuchsia-50: #ECFEFF; --color-fuchsia-100: #CFFAFE; --color-fuchsia-200: #A5F3FC; --color-fuchsia-300: #67E8F9; --color-fuchsia-400: #22D3EE; --color-fuchsia-500: #06B6D4; --color-fuchsia-600: #0891B2; --color-fuchsia-700: #0E7490; --color-fuchsia-800: #155E75; --color-fuchsia-900: #164E63; --color-fuchsia-950: #083344;
+  --color-pink-50: #ECFEFF; --color-pink-100: #CFFAFE; --color-pink-200: #A5F3FC; --color-pink-300: #67E8F9; --color-pink-400: #22D3EE; --color-pink-500: #06B6D4; --color-pink-600: #0891B2; --color-pink-700: #0E7490; --color-pink-800: #155E75; --color-pink-900: #164E63; --color-pink-950: #083344;
+  --color-indigo-50: #F5F3FF; --color-indigo-100: #EDE9FE; --color-indigo-200: #DDD6FE; --color-indigo-300: #C4B5FD; --color-indigo-400: #A78BFA; --color-indigo-500: #8B5CF6; --color-indigo-600: #7C3AED; --color-indigo-700: #6D28D9; --color-indigo-800: #5B21B6; --color-indigo-900: #4C1D95; --color-indigo-950: #2E1065;
+}

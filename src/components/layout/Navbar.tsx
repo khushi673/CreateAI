@@ -20,7 +20,7 @@ export const Navbar: React.FC = () => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80  py-3 transition-all duration-200">
+    <header className="app-navbar sticky top-0 z-40 w-full glass-panel border-b border-zinc-800/80  py-3 transition-all duration-200">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         
         {/* Brand / Logo */}
@@ -36,7 +36,7 @@ export const Navbar: React.FC = () => {
             onClick={() => setCurrentScreen('dashboard')}
             className="flex items-center gap-2.5 group text-left focus:outline-none"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform">
+            <div className="brand-mark w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./themes.css";
 
 @layer base {
   :root {
@@ -106,57 +107,4 @@
 
 .animate-fade-in-up {
   animation: fadeInUp 0.3s ease-out;
-}
-
-/* ─── Colour themes ───────────────────────────────────────────────
-   Each theme remaps Tailwind palette variables, so every screen keeps
-   its layout and only the colours change. No data-theme = original. */
-html[data-theme="gennook"] {
-  --color-zinc-50: #F6FAFA; --color-zinc-100: #E9F2F3; --color-zinc-200: #D3E3E5; --color-zinc-300: #AFC8CB; --color-zinc-400: #86A5A9; --color-zinc-500: #5F8186; --color-zinc-600: #3F6166; --color-zinc-700: #2A4A4F; --color-zinc-800: #183439; --color-zinc-900: #0D2428; --color-zinc-950: #071A1D;
-  --color-purple-50: #EEFBFB; --color-purple-100: #D4F4F5; --color-purple-200: #A8E7EA; --color-purple-300: #6FD3D9; --color-purple-400: #35B8C0; --color-purple-500: #139CA6; --color-purple-600: #0B8089; --color-purple-700: #08676F; --color-purple-800: #06515A; --color-purple-900: #053F46; --color-purple-950: #032A2F;
-  --color-fuchsia-50: #FFFAEB; --color-fuchsia-100: #FEF1C7; --color-fuchsia-200: #FDE28A; --color-fuchsia-300: #FCD15A; --color-fuchsia-400: #FBC23A; --color-fuchsia-500: #F9B51B; --color-fuchsia-600: #E39A07; --color-fuchsia-700: #BC7605; --color-fuchsia-800: #985C0B; --color-fuchsia-900: #7C4C0D; --color-fuchsia-950: #462704;
-  --color-indigo-50: #ECFAF7; --color-indigo-100: #CFF2EA; --color-indigo-200: #A0E4D6; --color-indigo-300: #64CFBB; --color-indigo-400: #2FB59D; --color-indigo-500: #159A84; --color-indigo-600: #0E7C6B; --color-indigo-700: #0F6357; --color-indigo-800: #104F47; --color-indigo-900: #11413B; --color-indigo-950: #052622;
-  --color-pink-50: #FFFAEB; --color-pink-100: #FEF1C7; --color-pink-200: #FDE28A; --color-pink-300: #FCD15A; --color-pink-400: #FBC23A; --color-pink-500: #F9B51B; --color-pink-600: #E39A07; --color-pink-700: #BC7605; --color-pink-800: #985C0B; --color-pink-900: #7C4C0D; --color-pink-950: #462704;
-}
-html[data-theme="ocean"] {
-  --color-zinc-50: #F6F8FC; --color-zinc-100: #ECF0F8; --color-zinc-200: #D9E0EE; --color-zinc-300: #B9C4DC; --color-zinc-400: #8F9DC0; --color-zinc-500: #66749A; --color-zinc-600: #46537A; --color-zinc-700: #2E3A5E; --color-zinc-800: #1A2442; --color-zinc-900: #10182F; --color-zinc-950: #080D1C;
-  --color-purple-50: #F2F6FF; --color-purple-100: #E3ECFF; --color-purple-200: #C9D9FF; --color-purple-300: #A2BDFF; --color-purple-400: #7598FF; --color-purple-500: #4F78FF; --color-purple-600: #3559F0; --color-purple-700: #2846CC; --color-purple-800: #2139A3; --color-purple-900: #1E3380; --color-purple-950: #141F4D;
-  --color-fuchsia-50: #ECFEFF; --color-fuchsia-100: #CFFAFE; --color-fuchsia-200: #A5F3FC; --color-fuchsia-300: #67E8F9; --color-fuchsia-400: #22D3EE; --color-fuchsia-500: #06B6D4; --color-fuchsia-600: #0891B2; --color-fuchsia-700: #0E7490; --color-fuchsia-800: #155E75; --color-fuchsia-900: #164E63; --color-fuchsia-950: #083344;
-  --color-indigo-50: #F0F5FF; --color-indigo-100: #E0EAFF; --color-indigo-200: #C3D4FE; --color-indigo-300: #9DB5FC; --color-indigo-400: #7590F8; --color-indigo-500: #5468F0; --color-indigo-600: #4049E2; --color-indigo-700: #3539C6; --color-indigo-800: #2D30A0; --color-indigo-900: #2A2E7E; --color-indigo-950: #191A4A;
-  --color-pink-50: #ECFEFF; --color-pink-100: #CFFAFE; --color-pink-200: #A5F3FC; --color-pink-300: #67E8F9; --color-pink-400: #22D3EE; --color-pink-500: #06B6D4; --color-pink-600: #0891B2; --color-pink-700: #0E7490; --color-pink-800: #155E75; --color-pink-900: #164E63; --color-pink-950: #083344;
-}
-html[data-theme="sunset"] {
-  --color-zinc-50: #FBF8F6; --color-zinc-100: #F5EFEC; --color-zinc-200: #EAE0DB; --color-zinc-300: #D6C8C2; --color-zinc-400: #B3A199; --color-zinc-500: #867069; --color-zinc-600: #5E4C46; --color-zinc-700: #433531; --color-zinc-800: #2D2320; --color-zinc-900: #1E1715; --color-zinc-950: #130E0C;
-  --color-purple-50: #FFF4F2; --color-purple-100: #FFE6E1; --color-purple-200: #FFD0C7; --color-purple-300: #FFAE9F; --color-purple-400: #FF8670; --color-purple-500: #FF6550; --color-purple-600: #EE4A36; --color-purple-700: #C93A29; --color-purple-800: #A13125; --color-purple-900: #842D24; --color-purple-950: #48130E;
-  --color-fuchsia-50: #FFF8EB; --color-fuchsia-100: #FFEDC7; --color-fuchsia-200: #FFDA8A; --color-fuchsia-300: #FFC24D; --color-fuchsia-400: #FFAB24; --color-fuchsia-500: #FB910B; --color-fuchsia-600: #DE6D05; --color-fuchsia-700: #B84B08; --color-fuchsia-800: #953A0E; --color-fuchsia-900: #7A310F; --color-fuchsia-950: #461703;
-  --color-indigo-50: #FDF2F8; --color-indigo-100: #FCE7F3; --color-indigo-200: #FBCFE8; --color-indigo-300: #F9A8D4; --color-indigo-400: #F472B6; --color-indigo-500: #EC4899; --color-indigo-600: #DB2777; --color-indigo-700: #BE185D; --color-indigo-800: #9D174D; --color-indigo-900: #831843; --color-indigo-950: #500724;
-  --color-pink-50: #FFF8EB; --color-pink-100: #FFEDC7; --color-pink-200: #FFDA8A; --color-pink-300: #FFC24D; --color-pink-400: #FFAB24; --color-pink-500: #FB910B; --color-pink-600: #DE6D05; --color-pink-700: #B84B08; --color-pink-800: #953A0E; --color-pink-900: #7A310F; --color-pink-950: #461703;
-}
-html[data-theme="violet"] {
-  --color-zinc-50: #F8F7FC; --color-zinc-100: #F0EEF8; --color-zinc-200: #E0DCEF; --color-zinc-300: #C5BFDD; --color-zinc-400: #A099BF; --color-zinc-500: #776F98; --color-zinc-600: #555075; --color-zinc-700: #3B3758; --color-zinc-800: #262340; --color-zinc-900: #18162C; --color-zinc-950: #0E0C1B;
-  --color-purple-50: #F6F3FF; --color-purple-100: #EDE7FF; --color-purple-200: #DDD2FF; --color-purple-300: #C3B0FF; --color-purple-400: #A587FF; --color-purple-500: #8B5CF6; --color-purple-600: #7C3AED; --color-purple-700: #6A2BD0; --color-purple-800: #5724A8; --color-purple-900: #481F87; --color-purple-950: #2C1257;
-  --color-fuchsia-50: #FFF1F5; --color-fuchsia-100: #FFE3EC; --color-fuchsia-200: #FFC9DA; --color-fuchsia-300: #FFA1BE; --color-fuchsia-400: #FF6F9C; --color-fuchsia-500: #F7477F; --color-fuchsia-600: #E42565; --color-fuchsia-700: #C01A52; --color-fuchsia-800: #9F1948; --color-fuchsia-900: #871A43; --color-fuchsia-950: #4C0821;
-  --color-indigo-50: #EEF2FF; --color-indigo-100: #E0E7FF; --color-indigo-200: #C7D2FE; --color-indigo-300: #A5B4FC; --color-indigo-400: #818CF8; --color-indigo-500: #6366F1; --color-indigo-600: #4F46E5; --color-indigo-700: #4338CA; --color-indigo-800: #3730A3; --color-indigo-900: #312E81; --color-indigo-950: #1E1B4B;
-  --color-pink-50: #FFF1F5; --color-pink-100: #FFE3EC; --color-pink-200: #FFC9DA; --color-pink-300: #FFA1BE; --color-pink-400: #FF6F9C; --color-pink-500: #F7477F; --color-pink-600: #E42565; --color-pink-700: #C01A52; --color-pink-800: #9F1948; --color-pink-900: #871A43; --color-pink-950: #4C0821;
-}
-
-/* Polish shared by the new themes: soft ambient glow behind the app,
-   gradient primary buttons and a gentle lift on hoverable cards. */
-html[data-theme] .app-shell {
-  background-image:
-    radial-gradient(900px 500px at 0% -10%, color-mix(in srgb, var(--color-purple-600) 16%, transparent), transparent 70%),
-    radial-gradient(700px 420px at 100% 0%, color-mix(in srgb, var(--color-fuchsia-500) 9%, transparent), transparent 70%);
-  background-attachment: fixed;
-}
-html[data-theme] .gradient-text {
-  background-image: linear-gradient(135deg, var(--color-purple-400) 0%, var(--color-fuchsia-400) 100%);
-}
-html[data-theme] .bg-purple-600 {
-  background-image: linear-gradient(135deg, var(--color-purple-500), var(--color-purple-700));
-}
-html[data-theme] .bg-purple-600:hover {
-  filter: brightness(1.08);
-}
-html[data-theme] .glass-card:hover {
-  transform: translateY(-1px);
 }

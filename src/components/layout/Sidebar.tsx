@@ -69,7 +69,7 @@ const SidebarContent: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
       <nav className="space-y-5 overflow-y-auto pr-1 -mr-1">
         {GROUPS.map((group) => (
           <div key={group.title}>
-            <h3 className="px-3 text-[10px] font-bold tracking-wider text-zinc-500 uppercase mb-1.5">
+            <h3 className="nav-group px-3 text-[10px] font-bold tracking-wider text-zinc-500 uppercase mb-1.5">
               {group.title}
               {group.hint && <span className="ml-1.5 normal-case font-medium tracking-normal text-zinc-600">{group.hint}</span>}
             </h3>
@@ -81,14 +81,16 @@ const SidebarContent: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
                   <button
                     key={item.label}
                     onClick={() => go(item)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    data-nav={item.id}
+                    data-active={active || undefined}
+                    className={`nav-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                       active
                         ? 'bg-purple-600/20 text-white border border-purple-500/40 shadow-sm'
                         : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60 border border-transparent'
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      <Icon className={`w-4 h-4 ${active ? 'text-purple-400' : item.color || 'text-zinc-500'}`} />
+                      <Icon className={`nav-icon w-4 h-4 ${active ? 'text-purple-400' : item.color || 'text-zinc-500'}`} />
                       {item.label}
                     </span>
                   </button>
@@ -107,7 +109,7 @@ export const Sidebar: React.FC = () => {
 
   return (
     <>
-      <aside className="hidden md:block w-60 border-r border-zinc-800/80 bg-zinc-950/90 h-[calc(100vh-65px)] sticky top-[65px] shrink-0 p-4">
+      <aside className="app-sidebar hidden md:block w-60 border-r border-zinc-800/80 bg-zinc-950/90 h-[calc(100vh-65px)] sticky top-[65px] shrink-0 p-4">
         <SidebarContent />
       </aside>
 
