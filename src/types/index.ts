@@ -236,14 +236,6 @@ export interface NewsItem {
   image: string;
 }
 
-export interface ApiKeyItem {
-  id: string;
-  name: string;
-  key: string;
-  createdAt: string;
-  revoked: boolean;
-}
-
 // ---------- Admin: per-model API key ----------
 
 export interface ModelApiKey {

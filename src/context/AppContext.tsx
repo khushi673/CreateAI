@@ -18,7 +18,6 @@ import {
   ReferenceItem,
   CreditTransaction,
   NewsItem,
-  ApiKeyItem,
   JobStage,
   DemoOutcome,
   GenerateParams,
@@ -178,10 +177,6 @@ interface AppContextType {
   newsItems: NewsItem[];
   publishAnnouncement: (title: string, body: string, recipientCount: number, byEmail?: boolean) => void;
 
-  // Developer API keys (mock)
-  apiKeys: ApiKeyItem[];
-  createApiKey: (name?: string) => ApiKeyItem;
-  revokeApiKey: (id: string) => void;
 
   // Modals
   buyCreditsModalOpen: boolean;
@@ -298,7 +293,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Billing, news, keys
   const [transactions, setTransactions] = useState<CreditTransaction[]>(INITIAL_TRANSACTIONS);
   const [newsItems, setNewsItems] = useState<NewsItem[]>(INITIAL_NEWS);
-  const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>([]);
 
   // Modals
   const [buyCreditsModalOpen, setBuyCreditsModalOpen] = useState<boolean>(false);
@@ -952,20 +946,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToast('Announcement sent successfully', `${byEmail ? 'Dashboard notification and email sent' : 'Dashboard notification sent'} to ${recipientCount} user${recipientCount === 1 ? '' : 's'}.`, 'success');
   };
 
-  // ---------- API keys ----------
-  const createApiKey = (name = 'ComfyUI workflow') => {
-    const rand = Array.from({ length: 16 }, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('');
-    const key: ApiKeyItem = { id: 'key_' + Date.now(), name, key: `sk-demo-${rand}`, createdAt: nowLabel(), revoked: false };
-    setApiKeys((prev) => [key, ...prev]);
-    addToast('API key created', 'Copy it now. This is a demo key.', 'success');
-    return key;
-  };
-
-  const revokeApiKey = (id: string) => {
-    setApiKeys((prev) => prev.map((k) => (k.id === id ? { ...k, revoked: true } : k)));
-    addToast('API key revoked', 'Requests with this key are now rejected.', 'warning');
-  };
-
   // ---------- Admin ----------
   const toggleUserStatus = (userId: string) => {
     const target = adminUsers.find((u) => u.id === userId);
@@ -1122,9 +1102,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         upgradePlan,
         newsItems,
         publishAnnouncement,
-        apiKeys,
-        createApiKey,
-        revokeApiKey,
         buyCreditsModalOpen,
         setBuyCreditsModalOpen,
         saveToProjectModalOpen,

@@ -722,8 +722,8 @@ export const INITIAL_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     badge: 'TEAMS',
     isPopular: false,
     active: true,
-    description: 'Team workspace, API keys and dedicated support.',
-    features: ['12,000 monthly credits', 'Team workspace', 'API keys / ComfyUI', 'Dedicated support'],
+    description: 'Team workspace and dedicated support.',
+    features: ['12,000 monthly credits', 'Team workspace', 'Dedicated support'],
   },
 ];
 

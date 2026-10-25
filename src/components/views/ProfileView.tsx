@@ -3,14 +3,12 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Settings, User, Bell, Save } from 'lucide-react';
-import { DeveloperApiPanel } from '@/components/profile/DeveloperApiPanel';
 
 export const ProfileView: React.FC = () => {
   const { user, setUser, addToast } = useApp();
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState(user.role);
-  const [tab, setTab] = useState<'profile' | 'api-keys'>('profile');
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,24 +32,6 @@ export const ProfileView: React.FC = () => {
         </div>
       </div>
 
-      <div className="inline-flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs font-semibold">
-        {([['profile', 'Profile'], ['api-keys', 'API keys']] as const).map(([id, label]) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`px-4 py-2 rounded-xl transition-all ${tab === id ? 'bg-purple-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'api-keys' ? (
-        <div className="space-y-4">
-          <p className="text-xs text-zinc-400">Use an API key to connect tools such as ComfyUI. Demo keys only.</p>
-          <DeveloperApiPanel />
-        </div>
-      ) : (
       <form onSubmit={handleSave} className="space-y-6">
         
         {/* Profile */}
@@ -138,7 +118,6 @@ export const ProfileView: React.FC = () => {
         </button>
 
       </form>
-      )}
 
     </div>
   );
