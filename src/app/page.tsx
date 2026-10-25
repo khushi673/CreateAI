@@ -48,7 +48,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col selection:bg-purple-600 selection:text-white">
+    <div className="app-shell min-h-screen bg-zinc-950 text-white flex flex-col selection:bg-purple-600 selection:text-white">
       <Navbar />
 
       <div className="flex-1 flex max-w-[1600px] w-full mx-auto">
